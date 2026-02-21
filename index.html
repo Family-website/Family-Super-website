@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Super website</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="header">
+            <h2 id="app-title">Ghar Ka Hisaab 💰</h2>
+            <p style="font-size: 12px; color: #bdc3c7; margin-top: 5px;">Created by ADITYA KUMAR</p>
+        </div>
+
+        <div class="content-area">
+            
+            <div id="section-hisab" class="app-section active-section">
+                <div class="balance-card">
+                    <p>Family Ka Total Kharcha</p>
+                    <h1 id="total-expense">₹0</h1>
+                </div>
+
+                <div class="form-section">
+                    <label>Kaun kharcha kar raha hai?</label>
+                    <select id="member-name">
+                        <option value="" disabled selected>Naam select karein...</option>
+                        <option value="Papa">Papa</option>
+                        <option value="Mummy">Mummy</option>
+                        <option value="Aditya">Aditya</option>
+                        <option value="Behan">Behan</option>
+                    </select>
+
+                    <label>Kharcha kis cheez par hua?</label>
+                    <input type="text" id="description" placeholder="e.g., Sabji, Ration, Petrol">
+                    
+                    <label>Kitne paise lage?</label>
+                    <input type="number" id="amount" placeholder="Amount (₹)">
+                    
+                    <label>Kis din?</label>
+                    <input type="date" id="date">
+                    
+                    <button class="expense-btn" onclick="addExpense()">Kharcha Add Karein (+)</button>
+                </div>
+
+                <div class="history-section">
+                    <h3>Sabhi Kharche ki List</h3>
+                    <ul id="history-list"></ul>
+                </div>
+            </div>
+
+            <div id="section-emi" class="app-section">
+                <div class="balance-card" style="background-color: #f39c12;">
+                    <p>Bank EMI Calculator</p>
+                    <h1 style="font-size: 35px;">🏦</h1>
+                </div>
+                <div class="form-section">
+                    <label>Loan Amount (Kitna loan liya?)</label>
+                    <input type="number" id="emi-principal" placeholder="e.g., 50000">
+                    
+                    <label>Interest Rate (Saal ka %)</label>
+                    <input type="number" id="emi-rate" placeholder="e.g., 10">
+                    
+                    <label>Time (Kitne mahine ke liye?)</label>
+                    <input type="number" id="emi-time" placeholder="e.g., 12">
+                    
+                    <button class="expense-btn" style="background-color: #f39c12;" onclick="calculateEMI()">EMI Nikalein</button>
+                </div>
+
+                <div class="result-card" id="emi-result" style="display:none;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">Har Mahine Ki EMI</h3>
+                    <h1 id="emi-amount" style="color: #e74c3c;">₹0</h1>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    <p style="color: #7f8c8d; font-size: 14px;">Total Interest: <strong id="emi-interest" style="color: #333;">₹0</strong></p>
+                    <p style="color: #7f8c8d; font-size: 14px;">Total Dena Hoga: <strong id="emi-total" style="color: #333;">₹0</strong></p>
+                </div>
+            </div>
+
+            <div id="section-vyaj" class="app-section">
+                <div class="balance-card" style="background-color: #27ae60;">
+                    <p>Gaon Ka Vyaj (Rupay Saikra)</p>
+                    <h1 style="font-size: 35px;">₹</h1>
+                </div>
+                <div class="form-section">
+                    <label>Muldhan (Kitne paise diye/liye?)</label>
+                    <input type="number" id="vyaj-principal" placeholder="e.g., 10000">
+                    
+                    <label>Dar (Kitne rupay saikra/mahina?)</label>
+                    <input type="number" id="vyaj-rate" placeholder="e.g., 5">
+                    
+                    <label>Samay (Kitne mahine ho gaye?)</label>
+                    <input type="number" id="vyaj-time" placeholder="e.g., 4">
+                    
+                    <button class="expense-btn" style="background-color: #27ae60;" onclick="calculateVyaj()">Vyaj Nikalein</button>
+                </div>
+
+                <div class="result-card" id="vyaj-result" style="display:none;">
+                    <h3 style="color: #2c3e50; margin-bottom: 10px;">Sirf Vyaj (Interest)</h3>
+                    <h1 id="vyaj-only" style="color: #e74c3c;">₹0</h1>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+                    <p style="color: #7f8c8d; font-size: 16px;">Total Lautana Hai: <strong id="vyaj-total" style="color: #27ae60; font-size: 20px;">₹0</strong></p>
+                </div>
+            </div>
+
+            <div id="section-dudh" class="app-section">
+                <div class="balance-card" style="background-color: #3498db;">
+                    <p>Is Mahine Ka Total Bill</p>
+                    <h1 id="dudh-total-bill">₹0</h1>
+                    <p style="margin-top: 5px; font-weight: bold;">Total Dudh: <span id="dudh-total-liter">0</span> Ltr</p>
+                </div>
+                
+                <div class="form-section">
+                    <label>Date aur Rate</label>
+                    <input type="date" id="dudh-date">
+                    <input type="number" id="dudh-rate" placeholder="Rate (₹ per Ltr) e.g. 50">
+                    
+                    <label>Kitna Dudh aaya? (100ml se 5 Ltr tak)</label>
+                    <small style="color: #7f8c8d; margin-bottom: 8px; display: block; font-size: 12px;">
+                        💡 Hint: 100ml = 0.1 | 500ml = 0.5 | 1 Ltr = 1 | 1.5 Ltr = 1.5
+                    </small>
+                    <input type="number" id="dudh-morning" placeholder="Subah (Max 5 Ltr)" step="0.1" min="0" max="5">
+                    <input type="number" id="dudh-evening" placeholder="Shaam (Max 5 Ltr)" step="0.1" min="0" max="5">
+                    
+                    <button class="expense-btn" style="background-color: #3498db;" onclick="addDudh()">Dudh Add Karein</button>
+                </div>
+
+                <div class="history-section">
+                    <h3>Daily Dudh Record</h3>
+                    <ul id="dudh-list"></ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-btn active-nav" onclick="openSection('hisab', 'Ghar Ka Hisaab 💰')">💰<br>Hisaab</button>
+            <button class="nav-btn" onclick="openSection('emi', 'EMI Calculator 🏦')">🏦<br>EMI</button>
+            <button class="nav-btn" onclick="openSection('vyaj', 'Gaon Ka Vyaj ₹')">₹<br>Vyaj</button>
+            <button class="nav-btn" onclick="openSection('dudh', 'Dudh Ka Hisaab 🥛')">🥛<br>Dudh</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
