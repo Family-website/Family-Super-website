@@ -54,7 +54,7 @@ function updateHisabUI() {
 
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
-        dateHeader.innerText = `📅 ${showDate}`;
+        dateHeader.innerText = `🗓️ ${showDate}`;
         list.appendChild(dateHeader);
 
         familyExpenses.forEach((item, index) => {
@@ -186,7 +186,7 @@ function updateDudhUI() {
         li.innerHTML = `
             <div class="list-left">
                 <div>
-                    <span class="member-badge" style="background-color: #34495e;">📅 ${showDate}</span> 
+                    <span class="member-badge" style="background-color: #34495e;">🗓️ ${showDate}</span> 
                     <strong style="font-size: 14px; color: #2c3e50;">S: ${record.morning}L | Sh: ${record.evening}L</strong>
                 </div>
                 <div style="font-size: 12px; color: gray; margin-top: 5px;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div>
