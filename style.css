@@ -157,3 +157,16 @@ li:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 20px rgba(
     color: #2c3e50; font-weight: 700; 
     transform: translateY(-8px) scale(1.1); 
 }
+
+/* --- NAYA: Search Bar Design --- */
+#search-expense {
+    width: 100%; padding: 12px 15px; margin-bottom: 15px;
+    border: 2px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; background-color: #f8fafc;
+    transition: all 0.3s ease; font-weight: 500;
+}
+#search-expense:focus {
+    border-color: #ff4b2b; background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255, 75, 43, 0.2); outline: none;
+}
+
