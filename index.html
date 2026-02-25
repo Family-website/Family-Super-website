@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Super App</title>
     
-    <link rel="icon" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="manifest" href="manifest.json">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <link rel="icon" href="./icon.png">
     <link rel="apple-touch-icon" href="./icon.png">
     <link rel="manifest" href="./manifest.json">
-
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
@@ -56,9 +52,7 @@
 
                 <div class="history-section">
                     <h3>Sabhi Kharche ki List</h3>
-                    
                     <input type="text" id="search-expense" placeholder="🔍 Naam ya kharcha dhoondhein (e.g., Papa)" onkeyup="updateHisabUI()">
-                    
                     <ul id="history-list"></ul>
                 </div>
             </div>
@@ -71,16 +65,12 @@
                 <div class="form-section">
                     <label>Loan Amount (Kitna loan liya?)</label>
                     <input type="number" id="emi-principal" placeholder="e.g., 50000">
-                    
                     <label>Interest Rate (Saal ka %)</label>
                     <input type="number" id="emi-rate" placeholder="e.g., 10">
-                    
                     <label>Time (Kitne mahine ke liye?)</label>
                     <input type="number" id="emi-time" placeholder="e.g., 12">
-                    
                     <button class="expense-btn" style="background-color: #f39c12;" onclick="calculateEMI()">EMI Nikalein</button>
                 </div>
-
                 <div class="result-card" id="emi-result" style="display:none;">
                     <h3 style="color: #2c3e50; margin-bottom: 10px;">Har Mahine Ki EMI</h3>
                     <h1 id="emi-amount" style="color: #e74c3c;">₹0</h1>
@@ -98,16 +88,12 @@
                 <div class="form-section">
                     <label>Muldhan (Kitne paise diye/liye?)</label>
                     <input type="number" id="vyaj-principal" placeholder="e.g., 10000">
-                    
                     <label>Dar (Kitne rupay saikra/mahina?)</label>
                     <input type="number" id="vyaj-rate" placeholder="e.g., 5">
-                    
                     <label>Samay (Kitne mahine ho gaye?)</label>
                     <input type="number" id="vyaj-time" placeholder="e.g., 4">
-                    
                     <button class="expense-btn" style="background-color: #27ae60;" onclick="calculateVyaj()">Vyaj Nikalein</button>
                 </div>
-
                 <div class="result-card" id="vyaj-result" style="display:none;">
                     <h3 style="color: #2c3e50; margin-bottom: 10px;">Sirf Vyaj (Interest)</h3>
                     <h1 id="vyaj-only" style="color: #e74c3c;">₹0</h1>
@@ -122,36 +108,26 @@
                     <h1 id="dudh-total-bill">₹0</h1>
                     <p style="margin-top: 5px; font-weight: bold;">Total Dudh: <span id="dudh-total-liter">0</span> Ltr</p>
                 </div>
-                
                 <div class="form-section">
                     <label>Date aur Rate</label>
                     <input type="date" id="dudh-date">
                     <input type="number" id="dudh-rate" placeholder="Rate (₹ per Ltr) e.g. 50">
-                    
                     <label>Kitna Dudh aaya? (100ml se 5 Ltr tak)</label>
-                    <small style="color: #7f8c8d; margin-bottom: 8px; display: block; font-size: 12px;">
-                        💡 Hint: 100ml = 0.1 | 250ml = 0.25 | 500ml = 0.5 | 1.5 Ltr = 1.5
-                    </small>
+                    <small style="color: #7f8c8d; margin-bottom: 8px; display: block; font-size: 12px;">💡 Hint: 100ml = 0.1 | 250ml = 0.25 | 500ml = 0.5 | 1.5 Ltr = 1.5</small>
                     <input type="number" id="dudh-morning" placeholder="Subah (Max 5 Ltr)" step="0.1" min="0" max="5">
                     <input type="number" id="dudh-evening" placeholder="Shaam (Max 5 Ltr)" step="0.1" min="0" max="5">
-                    
                     <button class="expense-btn" style="background-color: #3498db;" onclick="addDudh()">Dudh Add Karein</button>
                 </div>
-
                 <div class="checklist-section" style="background: white; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #ddd;">
                     <h3 style="margin-bottom: 10px; color: #2c3e50; font-size: 16px;">📅 Mahine Ki Checklist</h3>
-                    
                     <input type="month" id="checklist-month-picker" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; font-weight: bold;">
-                    
                     <div id="checklist-grid" class="checklist-grid"></div>
-                    
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 10px; color: gray;">
                         <span>🟩 Aaya</span>
                         <span>🟥 Nahi Aaya</span>
                         <span>⬜ Baaki hai</span>
                     </div>
                 </div>
-
                 <div class="history-section">
                     <h3>Daily Dudh Record</h3>
                     <ul id="dudh-list"></ul>
@@ -169,7 +145,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="script.js"></script>
+    <script src="./script.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('Service Worker Active ho gaya!'))
+                    .catch((err) => console.log('Service Worker Fail:', err));
+            });
+        }
+    </script>
 </body>
 </html>
-
