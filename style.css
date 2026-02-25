@@ -73,3 +73,4 @@ li:hover { transform: translateY(-3px) scale(1.01); box-shadow: 0 8px 20px rgba(
 .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 450px; display: flex; background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 10px 5px 15px 5px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 100; }
 .nav-btn { flex: 1; background: none; border: none; font-size: 13px; font-weight: 500; color: #a0aec0; cursor: pointer; text-align: center; padding: 8px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .active-nav { color: #2c3e50; font-weight: 700; transform: translateY(-8px) scale(1.1); }
+
