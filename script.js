@@ -358,4 +358,90 @@ function calculateEMI() {
     document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; document.getElementById('emi-interest').innerText = `₹${Math.round(totalAmount - p)}`; document.getElementById('emi-total').innerText = `₹${Math.round(totalAmount)}`;
 }
 function calculateVyaj() {
-    const p = parseFloat(document.getElementById('vyaj-principal').value); const r
+    const p = parseFloat(document.getElementById('vyaj-principal').value); const rate = parseFloat(document.getElementById('vyaj-rate').value); const time = parseFloat(document.getElementById('vyaj-time').value);
+    if (isNaN(p) || isNaN(rate) || isNaN(time) || p <= 0 || time <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
+    const interest = (p * rate * time) / 100;
+    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
+}
+
+// ==========================================
+// 4. DUDH KA HISAAB 
+// ==========================================
+let dudhRecords = []; try { dudhRecords = JSON.parse(localStorage.getItem('familyDudhData')) || []; } catch(e) { dudhRecords = []; }
+let editDudhIndex = -1;
+const dudhDateInput = document.getElementById('dudh-date'); if(dudhDateInput) dudhDateInput.value = todayDateString;
+const checklistMonthPicker = document.getElementById('checklist-month-picker'); if(checklistMonthPicker) { checklistMonthPicker.value = todayDateString.slice(0, 7); checklistMonthPicker.addEventListener('change', updateChecklist); }
+
+function updateDudhUI() {
+    const list = document.getElementById('dudh-list'); if(!list) return; list.innerHTML = ''; let totalLiter = 0, totalBill = 0;
+    dudhRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    dudhRecords.forEach((record, index) => {
+        const totalDayLiter = record.morning + record.evening; const dayCost = totalDayLiter * record.rate; totalLiter += totalDayLiter; totalBill += dayCost;
+        const parts = record.date.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
+        const li = document.createElement('li'); li.style.borderLeftColor = '#3498db'; 
+        li.innerHTML = `
+            <div class="list-left"><div style="display:flex; align-items:center; margin-bottom:6px;"><span class="member-badge" style="background:#e0f2fe; color:#3498db;">📅 ${showDate}</span><strong style="font-size:15px;">S: ${record.morning}L | Sh: ${record.evening}L</strong></div><div style="font-size:12px; color:#64748b; font-weight:600;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div></div>
+            <div class="list-right">
+                <span style="font-weight:800; color:#3498db; font-size:19px; margin-right:5px;">₹${dayCost}</span>
+                <button class="action-btn edit" onclick="editDudh(${index})">✏️</button>
+                <button class="action-btn delete" onclick="deleteDudh(${index})">🗑️</button>
+            </div>`;
+        list.appendChild(li);
+    });
+    document.getElementById('dudh-total-liter').innerText = totalLiter.toFixed(2); document.getElementById('dudh-total-bill').innerText = `₹${Math.round(totalBill)}`;
+    updateChecklist();
+}
+
+function updateChecklist() {
+    const grid = document.getElementById('checklist-grid'); if(!grid || !checklistMonthPicker.value) return; grid.innerHTML = '';
+    const [yearStr, monthStr] = checklistMonthPicker.value.split('-'); const daysInMonth = new Date(yearStr, monthStr, 0).getDate(); const enteredDates = new Set(dudhRecords.map(r => r.date));
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayBox = document.createElement('div'); dayBox.className = 'day-box'; dayBox.innerText = i; 
+        const checkDate = `${yearStr}-${monthStr}-${String(i).padStart(2, '0')}`;
+        if (enteredDates.has(checkDate)) dayBox.classList.add('day-yes'); else if (checkDate > todayDateString) dayBox.classList.add('day-future'); else dayBox.classList.add('day-no'); 
+        grid.appendChild(dayBox);
+    }
+}
+
+function addDudh() {
+    const dDate = document.getElementById('dudh-date').value; const rate = parseFloat(document.getElementById('dudh-rate').value); const morn = parseFloat(document.getElementById('dudh-morning').value) || 0; const eve = parseFloat(document.getElementById('dudh-evening').value) || 0;
+    if (!dDate || isNaN(rate) || (morn === 0 && eve === 0)) return Swal.fire('Galti', 'Sahi details daaliye!', 'error');
+    if(editDudhIndex === -1) { dudhRecords.push({ date: dDate, rate: rate, morning: morn, evening: eve }); Swal.fire({ icon: 'success', title: 'Add ho gaya!', timer: 1500, showConfirmButton: false }); } 
+    else { dudhRecords[editDudhIndex] = { date: dDate, rate: rate, morning: morn, evening: eve }; editDudhIndex = -1; document.getElementById('btn-add-dudh').innerText = "Dudh Add Karein"; Swal.fire('Updated!', 'Update ho gaya.', 'success'); }
+    localStorage.setItem('familyDudhData', JSON.stringify(dudhRecords)); updateDudhUI(); document.getElementById('dudh-morning').value = ''; document.getElementById('dudh-evening').value = '';
+}
+function editDudh(index) { const item = dudhRecords[index]; document.getElementById('dudh-date').value = item.date; document.getElementById('dudh-rate').value = item.rate; document.getElementById('dudh-morning').value = item.morning; document.getElementById('dudh-evening').value = item.evening; editDudhIndex = index; document.getElementById('btn-add-dudh').innerText = "Update Dudh ✏️"; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function deleteDudh(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Haan!' }).then((result) => { if (result.isConfirmed) { dudhRecords.splice(index, 1); localStorage.setItem('familyDudhData', JSON.stringify(dudhRecords)); updateDudhUI(); } }); }
+updateDudhUI();
+
+// ==========================================
+// 5. RATION LIST
+// ==========================================
+let rationItems = []; try { rationItems = JSON.parse(localStorage.getItem('familyRationData')) || []; } catch(e) { rationItems = []; }
+rationItems = rationItems.map(item => { if(!item.date) item.date = todayDateString; return item; });
+const rationDateInput = document.getElementById('ration-date'); if(rationDateInput) rationDateInput.value = todayDateString;
+
+function updateRationUI() {
+    const list = document.getElementById('ration-list'); if(!list) return; list.innerHTML = '';
+    rationItems.sort((a, b) => new Date(b.date) - new Date(a.date)); const uniqueDates = [...new Set(rationItems.map(item => item.date))];
+    uniqueDates.forEach(dateStr => {
+        const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
+        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.innerText = `🛒 ${showDate}`; list.appendChild(dateHeader);
+        rationItems.forEach((item, index) => {
+            if(item.date === dateStr) {
+                const li = document.createElement('li'); li.style.borderLeftColor = '#8e44ad';
+                li.innerHTML = `
+                    <div class="list-left ration-item ${item.bought ? 'bought' : ''}" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer;">
+                        <div class="checkbox-custom"></div><strong style="font-size: 16px;">${item.name}</strong>
+                    </div>
+                    <div class="list-right"><button class="action-btn delete" onclick="deleteRation(${index})">🗑️</button></div>`;
+                list.appendChild(li);
+            }
+        });
+    });
+}
+function addRation() { const name = document.getElementById('ration-item').value; const rDate = document.getElementById('ration-date').value; if(!name || !rDate) return Swal.fire('Bhai', 'Details daaliye!', 'warning'); rationItems.push({ name: name, bought: false, date: rDate }); localStorage.setItem('familyRationData', JSON.stringify(rationItems)); document.getElementById('ration-item').value = ''; updateRationUI(); }
+function toggleRation(index) { rationItems[index].bought = !rationItems[index].bought; localStorage.setItem('familyRationData', JSON.stringify(rationItems)); updateRationUI(); }
+function deleteRation(index) { rationItems.splice(index, 1); localStorage.setItem('familyRationData', JSON.stringify(rationItems)); updateRationUI(); }
+function clearRation() { Swal.fire({ title: 'Clear All?', text: "Saara ration delete ho jayega!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Haan' }).then((result) => { if (result.isConfirmed) { rationItems = []; localStorage.setItem('familyRationData', JSON.stringify(rationItems)); updateRationUI(); } }); }
+updateRationUI();
