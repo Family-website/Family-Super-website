@@ -434,3 +434,68 @@ function calculateVyaj() {
     const interest = (p * rate * time) / 100;
     document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
 }
+// ==========================================
+// ☁️ 8. BACKUP & RESTORE SYSTEM
+// ==========================================
+
+function backupData() {
+    const dataObj = {
+        expenses: familyExpenses,
+        dudh: dudhRecords,
+        ration: rationItems,
+        budget: budgetLimit
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "FamilyApp_Backup_" + todayDateString + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    
+    Swal.fire('Success!', 'Data ka backup tumhare phone mein download ho gaya hai!', 'success');
+}
+
+function restoreData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Purane backup format aur naye cloud format dono ko handle karne ke liye
+            if (importedData.expenses || importedData.familyExpenses) {
+                familyExpenses = importedData.expenses || importedData.familyExpenses || [];
+            }
+            if (importedData.dudh || importedData.dudhRecords) {
+                dudhRecords = importedData.dudh || importedData.dudhRecords || [];
+            }
+            if (importedData.ration || importedData.rationItems) {
+                rationItems = importedData.ration || importedData.rationItems || [];
+            }
+            if (importedData.budget || importedData.budgetLimit) {
+                budgetLimit = importedData.budget || importedData.budgetLimit || 20000;
+            }
+            
+            // UI Update karein
+            updateHisabUI();
+            updateDudhUI();
+            updateRationUI();
+            
+            // Agar cloud login hai, toh seedha wahan save kar do
+            if (currentUser) {
+                await saveToCloud();
+                Swal.fire('Restored & Synced!', 'Data wapas aagaya aur Cloud par bhi save ho gaya! ☁️', 'success');
+            } else {
+                Swal.fire('Restored!', 'Data wapas aagaya hai! (Lekin login nahi ho isliye Cloud par save nahi hua)', 'info');
+            }
+            
+        } catch (err) {
+            Swal.fire('Error', 'Sahi backup file select karein.', 'error');
+            console.log(err);
+        }
+    };
+    reader.readAsText(file);
+}
