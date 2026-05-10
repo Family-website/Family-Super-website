@@ -510,3 +510,54 @@ function restoreData(event) {
     };
     reader.readAsText(file);
 }
+
+// ==========================================
+// 📤 9. SHARE PDF REPORT SYSTEM 
+// ==========================================
+async function shareReport() {
+    if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
+    
+    const filterMonth = document.getElementById('month-filter').value;
+    const dataToExport = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
+    
+    if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai share karne ke liye.', 'info');
+
+    // 1. PDF Design Banayein (Download wale ki tarah)
+    const { jsPDF } = window.jspdf; 
+    const doc = new jsPDF();
+    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
+    
+    const tableColumn = ["Date", "Name", "Category", "Details", "Amount"]; 
+    const tableRows = []; let totalAmount = 0;
+    
+    [...dataToExport].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(exp => { 
+        const p = exp.date.split('-'); 
+        tableRows.push([`${p[2]}/${p[1]}`, exp.member || '-', exp.category || 'Other', exp.description, `Rs ${exp.amount}`]); 
+        totalAmount += exp.amount; 
+    });
+    
+    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
+    
+    // 2. PDF ko File Format mein badlein (Taki share ho sake)
+    const pdfBlob = doc.output('blob');
+    const fileName = `Hisaab_${filterMonth}.pdf`;
+    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+    // 3. Mobile ka Share Menu Kholein
+    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        try {
+            await navigator.share({
+                title: `Ghar Ka Hisaab - ${filterMonth}`,
+                text: `Is mahine ka total kharcha: ₹${totalAmount}. Puri details PDF mein check karein!`,
+                files: [pdfFile]
+            });
+        } catch (error) {
+            console.log('Share cancel hua:', error);
+        }
+    } else {
+        // Agar browser PDF share support na kare, toh download kar dega
+        Swal.fire('Browser Support Nahi Hai', 'Aapka browser direct PDF share karna support nahi karta. File download ho gayi hai, usey WhatsApp par bhej dein.', 'info');
+        doc.save(fileName); 
+    }
+}
+
