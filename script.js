@@ -7,11 +7,9 @@ const firebaseConfig = {
   projectId: "super-family-appp",
   storageBucket: "super-family-appp.firebasestorage.app",
   messagingSenderId: "250506329447",
-  appId: "1:250506329447:web:cf9ac2e4d6d24b37e903c2",
-  measurementId: "G-0E3C8289HF"
+  appId: "1:250506329447:web:cf9ac2e4d6d24b37e903c2"
 };
 
-// Initialize Firebase (Compat Version)
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -19,28 +17,25 @@ const db = firebase.firestore();
 let currentUser = null;
 
 // ==========================================
-// 🔐 2. GOOGLE LOGIN SYSTEM (Redirect Method)
+// 🔐 2. EMAIL / PASSWORD AUTH SYSTEM
 // ==========================================
 const loginScreen = document.getElementById('login-screen');
 const mainApp = document.getElementById('main-app');
 const loginStatus = document.getElementById('login-status');
 
+// Yahan se Firebase yaad rakhega ki tum login ho chuke ho
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         currentUser = user;
         if(loginStatus) {
             loginStatus.style.display = 'block';
-            loginStatus.innerText = "Cloud se data laa rahe hain... ⏳";
+            loginStatus.innerText = "Cloud data laa rahe hain... ⏳";
         }
-        document.getElementById('smart-greeting').innerText = `Hello, ${user.displayName.split(" ")[0]}! ✨`;
+        document.getElementById('smart-greeting').innerText = `Hello! ✨`;
         
-        // 1. Cloud se data laao
         await loadCloudData(user.uid);
-        
-        // 2. Agar phone mein purana data hai toh usko cloud par bhej do
         await syncOldLocalData();
         
-        // UI Dikhao
         loginScreen.style.opacity = "0";
         setTimeout(() => {
             loginScreen.style.display = 'none';
@@ -58,13 +53,40 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
-function loginWithGoogle() {
-    if(loginStatus) {
-        loginStatus.style.display = 'block';
-        loginStatus.innerText = "Google par jaa rahe hain... ⏳";
+function registerWithEmail() {
+    const email = document.getElementById('email-input').value;
+    const password = document.getElementById('password-input').value;
+
+    if (!email || password.length < 6) {
+        return Swal.fire('Error', 'Sahi email daaliye aur password kam se kam 6 akshar ka hona chahiye!', 'error');
     }
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider); // Mobile ke liye Redirect best hai
+
+    loginStatus.style.display = 'block';
+    loginStatus.innerText = "Account ban raha hai... ⏳";
+
+    auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
+        Swal.fire('Success', 'Naya account ban gaya!', 'success');
+    }).catch((error) => {
+        Swal.fire('Error', error.message, 'error');
+        loginStatus.style.display = 'none';
+    });
+}
+
+function loginWithEmail() {
+    const email = document.getElementById('email-input').value;
+    const password = document.getElementById('password-input').value;
+
+    if (!email || !password) {
+        return Swal.fire('Error', 'Kripya Email aur Password dono daalein!', 'warning');
+    }
+
+    loginStatus.style.display = 'block';
+    loginStatus.innerText = "Login ho raha hai... ⏳";
+
+    auth.signInWithEmailAndPassword(email, password).catch((error) => {
+        Swal.fire('Login Error', 'Email ya Password galat hai.', 'error');
+        loginStatus.style.display = 'none';
+    });
 }
 
 function logout() {
@@ -140,15 +162,11 @@ async function syncOldLocalData() {
 
         if (dataChanged) {
             await saveToCloud();
-            console.log("Old Local Data Synced to Cloud Successfully! ✅");
-            // Sync hone ke baad phone ki memory khali kar do taaki double na ho
             localStorage.removeItem('familyExpenses');
             localStorage.removeItem('dudhRecords');
             localStorage.removeItem('rationItems');
         }
-    } catch(e) {
-        console.log("Error syncing local data:", e);
-    }
+    } catch(e) {}
 }
 
 // ==========================================
@@ -434,17 +452,12 @@ function calculateVyaj() {
     const interest = (p * rate * time) / 100;
     document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
 }
+
 // ==========================================
 // ☁️ 8. BACKUP & RESTORE SYSTEM
 // ==========================================
-
 function backupData() {
-    const dataObj = {
-        expenses: familyExpenses,
-        dudh: dudhRecords,
-        ration: rationItems,
-        budget: budgetLimit
-    };
+    const dataObj = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit };
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
@@ -452,49 +465,31 @@ function backupData() {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-    
     Swal.fire('Success!', 'Data ka backup tumhare phone mein download ho gaya hai!', 'success');
 }
 
 function restoreData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
             const importedData = JSON.parse(e.target.result);
+            if (importedData.expenses || importedData.familyExpenses) familyExpenses = importedData.expenses || importedData.familyExpenses || [];
+            if (importedData.dudh || importedData.dudhRecords) dudhRecords = importedData.dudh || importedData.dudhRecords || [];
+            if (importedData.ration || importedData.rationItems) rationItems = importedData.ration || importedData.rationItems || [];
+            if (importedData.budget || importedData.budgetLimit) budgetLimit = importedData.budget || importedData.budgetLimit || 20000;
             
-            // Purane backup format aur naye cloud format dono ko handle karne ke liye
-            if (importedData.expenses || importedData.familyExpenses) {
-                familyExpenses = importedData.expenses || importedData.familyExpenses || [];
-            }
-            if (importedData.dudh || importedData.dudhRecords) {
-                dudhRecords = importedData.dudh || importedData.dudhRecords || [];
-            }
-            if (importedData.ration || importedData.rationItems) {
-                rationItems = importedData.ration || importedData.rationItems || [];
-            }
-            if (importedData.budget || importedData.budgetLimit) {
-                budgetLimit = importedData.budget || importedData.budgetLimit || 20000;
-            }
+            updateHisabUI(); updateDudhUI(); updateRationUI();
             
-            // UI Update karein
-            updateHisabUI();
-            updateDudhUI();
-            updateRationUI();
-            
-            // Agar cloud login hai, toh seedha wahan save kar do
             if (currentUser) {
                 await saveToCloud();
                 Swal.fire('Restored & Synced!', 'Data wapas aagaya aur Cloud par bhi save ho gaya! ☁️', 'success');
             } else {
                 Swal.fire('Restored!', 'Data wapas aagaya hai! (Lekin login nahi ho isliye Cloud par save nahi hua)', 'info');
             }
-            
         } catch (err) {
             Swal.fire('Error', 'Sahi backup file select karein.', 'error');
-            console.log(err);
         }
     };
     reader.readAsText(file);
