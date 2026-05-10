@@ -121,6 +121,14 @@
                         <canvas id="memberChart"></canvas>
                     </div>
 
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <button onclick="backupData()" style="flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">☁️ Backup Data</button>
+                        <label style="flex: 1; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                            🔄 Restore Data
+                            <input type="file" accept=".json" style="display: none;" onchange="restoreData(event)">
+                        </label>
+                    </div>
+
                     <button onclick="exportToPDF()" style="margin-bottom:15px; width:100%; padding:10px; background:rgba(231,76,60,0.9); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold; box-shadow: 0 4px 10px rgba(231,76,60,0.3);">📄 Download PDF Report</button>
                     
                     <ul id="history-list"></ul>
