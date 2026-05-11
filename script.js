@@ -12,9 +12,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase (Compat Version)
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -143,6 +141,7 @@ async function syncOldLocalData() {
         if (dataChanged) {
             await saveToCloud();
             console.log("Old Local Data Synced to Cloud Successfully! ✅");
+            // Sync hone ke baad phone ki memory khali kar do taaki double na ho
             localStorage.removeItem('familyExpenses');
             localStorage.removeItem('dudhRecords');
             localStorage.removeItem('rationItems');
@@ -180,42 +179,22 @@ function openSection(sectionName, title) {
         }
     });
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    try { document.getElementById('sound-click').play(); } catch(e){}
 }
 
 const now = new Date();
 const todayDateString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
 // ==========================================
-// 💰 5. HISAAB SECTION & RECEIPT UPLOAD
+// 💰 5. HISAAB SECTION
 // ==========================================
 let editExpenseIndex = -1;
 let currentReceiptUrl = ""; 
-let categoryChartInstance = null; 
-let memberChartInstance = null; 
+let categoryChartInstance = null; let memberChartInstance = null; 
 
 const dateInput = document.getElementById('date');
 if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter');
 if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
-
-// 🔥 RECEIPT IMAGE READER LOGIC
-const receiptInput = document.getElementById('receipt-img');
-if(receiptInput) {
-    receiptInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                currentReceiptUrl = event.target.result;
-                const preview = document.getElementById('receipt-preview');
-                preview.src = currentReceiptUrl;
-                preview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-}
 
 function setBudget() {
     Swal.fire({ title: 'Monthly Budget', input: 'number', inputValue: budgetLimit, showCancelButton: true }).then((result) => {
@@ -230,7 +209,7 @@ function setBudget() {
 function renderHistoryWithSkeleton() {
     const list = document.getElementById('history-list');
     if(!list) return;
-    list.innerHTML = `<div class="skeleton-box" style="height: 60px; background: #e2e8f0; border-radius: 8px; margin-bottom: 10px; animation: smoothFadeIn 1s infinite alternate;"></div><div class="skeleton-box" style="height: 60px; background: #e2e8f0; border-radius: 8px; margin-bottom: 10px; animation: smoothFadeIn 1s infinite alternate;"></div>`;
+    list.innerHTML = `<div class="skeleton-box"></div><div class="skeleton-box"></div>`;
     setTimeout(updateHisabUI, 400); 
 }
 
@@ -244,23 +223,15 @@ function updateHisabUI() {
     if(budgetDisplay) budgetDisplay.innerText = budgetLimit;
 
     const filteredExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
-    let totalExpense = 0; 
-    let categoryTotals = { "Ration": 0, "Medical": 0, "Petrol": 0, "Shopping": 0, "Bills": 0, "Other": 0 }; 
-    let memberTotals = {};
+    let totalExpense = 0; let categoryTotals = { "Ration": 0, "Medical": 0, "Petrol": 0, "Shopping": 0, "Bills": 0, "Other": 0 }; let memberTotals = {};
 
     const uniqueDates = [...new Set(filteredExpenses.map(item => item.date))].sort((a, b) => new Date(b) - new Date(a));
 
     uniqueDates.forEach(dateStr => {
-        const parts = dateStr.split('-'); 
-        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); 
+        const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); 
         const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
 
-        const dateHeader = document.createElement('div'); 
-        dateHeader.className = 'date-header'; 
-        dateHeader.style.fontWeight = 'bold';
-        dateHeader.style.color = '#2563eb';
-        dateHeader.style.margin = '10px 0 5px 0';
-        dateHeader.innerText = `📅 ${showDate}`;
+        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.innerText = `📅 ${showDate}`;
         list.appendChild(dateHeader);
 
         filteredExpenses.forEach((item) => {
@@ -271,19 +242,19 @@ function updateHisabUI() {
 
                 const originalIndex = familyExpenses.indexOf(item);
                 const li = document.createElement('li');
-                let receiptHTML = item.receipt ? `<img src="${item.receipt}" class="receipt-thumb" style="width:30px; height:30px; border-radius:5px; object-fit:cover; margin-right:5px; cursor:pointer;" onclick="Swal.fire({imageUrl: '${item.receipt}', imageWidth: '100%'})">` : '';
+                let receiptHTML = item.receipt ? `<img src="${item.receipt}" class="receipt-thumb" onclick="Swal.fire({imageUrl: '${item.receipt}', imageWidth: '100%'})">` : '';
 
                 li.innerHTML = `
                     <div class="list-left">
-                        <strong style="font-size: 18px;">${item.description}</strong>
-                        <div style="display: flex; align-items: center; margin-top: 5px; flex-wrap: wrap; gap: 5px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 5px;">
                             <span class="member-badge">👤 ${item.member}</span> 
-                            <span class="category-badge">${cat}</span>
+                            <span class="category-badge cat-${cat}">${cat}</span>
                         </div>
+                        <strong style="font-size: 15px;">${item.description}</strong>
                     </div>
                     <div class="list-right">
                         ${receiptHTML}
-                        <span style="font-weight: 800; color: #e74c3c; font-size: 20px; margin: 0 5px;">₹${item.amount}</span> 
+                        <span style="font-weight: 800; color: #e74c3c; font-size: 17px; margin: 0 5px;">₹${item.amount}</span> 
                         <button class="action-btn edit" onclick="editExpense(${originalIndex})" title="Edit">✏️</button>
                         <button class="action-btn delete" onclick="deleteExpense(${originalIndex})" title="Delete">🗑️</button>
                     </div>
@@ -301,27 +272,25 @@ function updateHisabUI() {
     const bar = document.getElementById('budget-bar'); 
     if(bar) {
         bar.style.width = `${budgetPercent}%`;
-        if(budgetPercent < 50) bar.style.background = '#2ecc71'; 
-        else if(budgetPercent < 80) bar.style.background = '#f39c12'; 
-        else bar.style.background = '#e74c3c';
+        if(budgetPercent < 50) bar.style.background = '#2ecc71'; else if(budgetPercent < 80) bar.style.background = '#f39c12'; else { bar.style.background = '#e74c3c'; document.getElementById('budget-warning').style.display = 'block'; }
+        if(budgetPercent < 80) document.getElementById('budget-warning').style.display = 'none';
     }
 
-    renderCategoryChart(categoryTotals); 
-    renderMemberChart(memberTotals);
+    renderCategoryChart(categoryTotals); renderMemberChart(memberTotals);
 }
 
 function renderCategoryChart(dataObj) {
     const ctx = document.getElementById('categoryChart'); if(!ctx) return;
     if(categoryChartInstance) categoryChartInstance.destroy(); 
     const labels = Object.keys(dataObj); const data = Object.values(dataObj); const hasData = data.some(val => val > 0); const textColor = isDarkMode ? '#fff' : '#333';
-    categoryChartInstance = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#2563eb', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#1e293b' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: {size: 11} } } }, cutout: '70%' } });
+    categoryChartInstance = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#f2994a', '#eb3349', '#4b6cb7', '#b06ab3', '#f8b500', '#bdc3c7'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#111' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: textColor, font: {size: 11} } } } } });
 }
 
 function renderMemberChart(dataObj) {
     const ctx = document.getElementById('memberChart'); if(!ctx) return;
     if(memberChartInstance) memberChartInstance.destroy(); 
     const labels = Object.keys(dataObj); const data = Object.values(dataObj); const hasData = data.some(val => val > 0); const textColor = isDarkMode ? '#fff' : '#333';
-    memberChartInstance = new Chart(ctx.getContext('2d'), { type: 'pie', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#2980b9', '#e84393', '#27ae60', '#8e44ad', '#16a085'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#1e293b' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: {size: 12, weight: 'bold'} } } } } });
+    memberChartInstance = new Chart(ctx.getContext('2d'), { type: 'pie', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#2980b9', '#e84393', '#27ae60', '#8e44ad', '#16a085'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#111' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: {size: 12, weight: 'bold'} } } } } });
 }
 
 function addExpense() {
@@ -336,7 +305,6 @@ function addExpense() {
 
     if(editExpenseIndex === -1) {
         familyExpenses.push(newRecord);
-        try { document.getElementById('sound-success').play(); } catch(e){}
         if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
     } else {
         familyExpenses[editExpenseIndex] = newRecord;
@@ -346,11 +314,8 @@ function addExpense() {
     }
 
     saveToCloud(); 
-    document.getElementById('description').value = ''; 
-    document.getElementById('amount').value = ''; 
+    document.getElementById('description').value = ''; document.getElementById('amount').value = ''; 
     currentReceiptUrl = ""; 
-    document.getElementById('receipt-preview').style.display = 'none';
-    if(receiptInput) receiptInput.value = "";
     renderHistoryWithSkeleton();
 }
 
@@ -376,10 +341,24 @@ function deleteExpense(index) {
     });
 }
 
+function exportToPDF() {
+    if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
+    const filterMonth = document.getElementById('month-filter').value;
+    const dataToExport = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
+    if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai.', 'info');
+
+    const { jsPDF } = window.jspdf; const doc = new jsPDF();
+    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
+    const tableColumn = ["Date", "Name", "Category", "Details", "Amount"]; const tableRows = []; let totalAmount = 0;
+    [...dataToExport].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(exp => { const p = exp.date.split('-'); tableRows.push([`${p[2]}/${p[1]}`, exp.member || '-', exp.category || 'Other', exp.description, `Rs ${exp.amount}`]); totalAmount += exp.amount; });
+    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
+    doc.save(`Hisaab_${filterMonth}.pdf`);
+}
+
 // ==========================================
 // 🥛 6. DUDH & RATION SECTIONS
 // ==========================================
- let editDudhIndex = -1;
+let editDudhIndex = -1;
 const dudhDateInput = document.getElementById('dudh-date'); if(dudhDateInput) dudhDateInput.value = todayDateString;
 
 function updateDudhUI() {
@@ -388,17 +367,11 @@ function updateDudhUI() {
     dudhRecords.forEach((record, index) => {
         const totalDayLiter = record.morning + record.evening; const dayCost = totalDayLiter * record.rate; totalLiter += totalDayLiter; totalBill += dayCost;
         const parts = record.date.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const li = document.createElement('li'); 
+        const li = document.createElement('li'); li.style.borderLeftColor = '#3498db'; 
         li.innerHTML = `
-            <div class="list-left">
-                <div style="display:flex; align-items:center; margin-bottom:6px;">
-                    <span class="member-badge" style="background:#bfdbfe; color:#2563eb;">📅 ${showDate}</span>
-                    <strong style="font-size:15px;">S: ${record.morning}L | Sh: ${record.evening}L</strong>
-                </div>
-                <div style="font-size:12px; color:#64748b; font-weight:600;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div>
-            </div>
+            <div class="list-left"><div style="display:flex; align-items:center; margin-bottom:6px;"><span class="member-badge" style="background:#e0f2fe; color:#3498db;">📅 ${showDate}</span><strong style="font-size:15px;">S: ${record.morning}L | Sh: ${record.evening}L</strong></div><div style="font-size:12px; color:#64748b; font-weight:600;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div></div>
             <div class="list-right">
-                <span style="font-weight:800; color:#2563eb; font-size:19px; margin-right:5px;">₹${dayCost}</span>
+                <span style="font-weight:800; color:#3498db; font-size:19px; margin-right:5px;">₹${dayCost}</span>
                 <button class="action-btn edit" onclick="editDudh(${index})">✏️</button>
                 <button class="action-btn delete" onclick="deleteDudh(${index})">🗑️</button>
             </div>`;
@@ -427,16 +400,13 @@ function updateRationUI() {
     rationItems.sort((a, b) => new Date(b.date) - new Date(a.date)); const uniqueDates = [...new Set(rationItems.map(item => item.date))];
     uniqueDates.forEach(dateStr => {
         const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; 
-        dateHeader.style.fontWeight = 'bold'; dateHeader.style.color = '#c084fc'; dateHeader.style.margin = '10px 0 5px 0';
-        dateHeader.innerText = `🛒 ${showDate}`; list.appendChild(dateHeader);
+        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.innerText = `🛒 ${showDate}`; list.appendChild(dateHeader);
         rationItems.forEach((item, index) => {
             if(item.date === dateStr) {
-                const li = document.createElement('li'); 
+                const li = document.createElement('li'); li.style.borderLeftColor = '#8e44ad';
                 li.innerHTML = `
-                    <div class="list-left ration-item" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer; opacity: ${item.bought ? '0.5' : '1'};">
-                        <input type="checkbox" ${item.bought ? 'checked' : ''} style="width: 20px; height: 20px; margin-right:10px;">
-                        <strong style="font-size: 18px; text-decoration: ${item.bought ? 'line-through' : 'none'};">${item.name}</strong>
+                    <div class="list-left ration-item ${item.bought ? 'bought' : ''}" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer;">
+                        <div class="checkbox-custom"></div><strong style="font-size: 16px;">${item.name}</strong>
                     </div>
                     <div class="list-right"><button class="action-btn delete" onclick="deleteRation(${index})">🗑️</button></div>`;
                 list.appendChild(li);
@@ -454,21 +424,18 @@ function deleteRation(index) { rationItems.splice(index, 1); saveToCloud(); upda
 function calculateEMI() {
     const p = parseFloat(document.getElementById('emi-principal').value); const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100; const n = parseFloat(document.getElementById('emi-time').value);
     if (isNaN(p) || isNaN(r) || isNaN(n) || p <= 0 || n <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
-    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); 
-    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; 
-    try { document.getElementById('sound-click').play(); } catch(e){}
+    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); const totalAmount = emi * n;
+    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; document.getElementById('emi-interest').innerText = `₹${Math.round(totalAmount - p)}`; document.getElementById('emi-total').innerText = `₹${Math.round(totalAmount)}`;
 }
 
 function calculateVyaj() {
     const p = parseFloat(document.getElementById('vyaj-principal').value); const rate = parseFloat(document.getElementById('vyaj-rate').value); const time = parseFloat(document.getElementById('vyaj-time').value);
     if (isNaN(p) || isNaN(rate) || isNaN(time) || p <= 0 || time <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
     const interest = (p * rate * time) / 100;
-    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; 
-    try { document.getElementById('sound-click').play(); } catch(e){}
+    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
 }
-
 // ==========================================
-// 📤 8. SHARE PDF & BACKUP/RESTORE SYSTEM 
+// 📤 9. SHARE PDF REPORT SYSTEM 
 // ==========================================
 async function shareReport() {
     if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
@@ -478,6 +445,7 @@ async function shareReport() {
     
     if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai share karne ke liye.', 'info');
 
+    // 1. PDF Design Banayein (Download wale ki tarah)
     const { jsPDF } = window.jspdf; 
     const doc = new jsPDF();
     doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
@@ -493,10 +461,12 @@ async function shareReport() {
     
     doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
     
+    // 2. PDF ko File Format mein badlein (Taki share ho sake)
     const pdfBlob = doc.output('blob');
     const fileName = `Hisaab_${filterMonth}.pdf`;
     const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
 
+    // 3. Mobile ka Share Menu Kholein
     if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
         try {
             await navigator.share({
@@ -508,71 +478,8 @@ async function shareReport() {
             console.log('Share cancel hua:', error);
         }
     } else {
-        Swal.fire('Download Ho Gaya', 'Aapka browser direct PDF share karna support nahi karta. File download ho gayi hai.', 'info');
+        // Agar browser PDF share support na kare, toh download kar dega
+        Swal.fire('Browser Support Nahi Hai', 'Aapka browser direct PDF share karna support nahi karta. File download ho gayi hai, usey WhatsApp par bhej dein.', 'info');
         doc.save(fileName); 
     }
-}
-
-function exportToPDF() { shareReport(); /* Temporary linking both to same logic */ }
-
-// 🔥 BACKUP DATA TO JSON FILE
-function backupData() {
-    const dataToBackup = {
-        expenses: familyExpenses,
-        dudh: dudhRecords,
-        ration: rationItems,
-        budget: budgetLimit
-    };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "Family_Cloud_Backup.json");
-    dlAnchorElem.click();
-}
-
-// 🔥 RESTORE DATA FROM JSON FILE
-function restoreData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (data.expenses || data.dudh || data.ration) {
-                familyExpenses = data.expenses || [];
-                dudhRecords = data.dudh || [];
-                rationItems = data.ration || [];
-                budgetLimit = data.budget || 20000;
-                
-                await saveToCloud();
-                
-                Swal.fire('Restored!', 'Aapka purana data wapas aa gaya hai! ✅', 'success');
-                renderHistoryWithSkeleton();
-                updateDudhUI();
-                updateRationUI();
-            } else {
-                Swal.fire('Error', 'Yeh file sahi format mein nahi hai!', 'error');
-            }
-        } catch(err) {
-            Swal.fire('Error', 'File read nahi ho paayi.', 'error');
-        }
-    };
-    reader.readAsText(file);
-}
-
-// ==========================================
-// 🎙️ 9. VOICE TYPING (JADU!)
-// ==========================================
-function startVoice() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'hi-IN';
-    const btn = document.getElementById('mic-btn');
-    btn.innerText = "🛑";
-    
-    recognition.onresult = (event) => {
-        document.getElementById('description').value = event.results[0][0].transcript;
-        btn.innerText = "🎤";
-    };
-    recognition.onerror = () => { btn.innerText = "🎤"; Swal.fire('Error', 'Awaz clear nahi aayi!', 'error'); };
-    recognition.start();
 }
