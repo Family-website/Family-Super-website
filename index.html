@@ -10,7 +10,6 @@
     <link rel="manifest" href="./manifest.json">
     
     <meta name="description" content="Family Super App - Ghar ka hisaab, EMI calculator, Dudh aur Ration ka record rakhne wala smart personal app.">
-    <meta name="google-site-verification" content="fZwGT-hq1h80Z_KN46QPPakhStF9F_geRxz_t1Wg2K0" />
     
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
@@ -18,26 +17,24 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
 
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s ease;">
-        <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_p8bfn5to.json" background="transparent" speed="1.5" style="width: 180px; height: 180px;" loop autoplay></lottie-player>
-        <h1 style="font-family: 'Caveat', cursive; font-size: 42px; color: #2563eb; margin-top: -20px; font-weight: 700;">Family Super App</h1>
-        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">Loading... ☁️</p>
+        <div class="anim-cloud">☁️</div>
+        <h1 style="font-family: 'Caveat', cursive; font-size: 44px; color: #2563eb; font-weight: 700; margin-top: 10px;">Family Super App</h1>
+        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">Loading Securely... ⏳</p>
     </div>
 
     <div id="login-screen" class="lock-overlay" style="display: none;">
         <div class="lock-card" style="width: 90%; max-width: 350px;">
-            <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_zrqthn6o.json" background="transparent" speed="1" style="width: 100px; height: 100px; margin: 0 auto -15px auto;" loop autoplay></lottie-player>
+            <div class="anim-lock">🔐</div>
             <h2 id="lock-title">Family Cloud</h2>
             <p id="lock-desc" style="margin-bottom: 20px; color: #94a3b8; font-size: 13px; font-weight: 700;">Humesha ke liye jud jaayein!</p>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                <input type="email" id="email-input" placeholder="Email ID (e.g., papa@ghar.com)" style="padding: 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: inherit;">
-                <input type="password" id="password-input" placeholder="Password (Min 6 letters)" style="padding: 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: inherit;">
+                <input type="email" id="email-input" placeholder="Email ID (e.g., papa@ghar.com)">
+                <input type="password" id="password-input" placeholder="Password (Min 6 letters)">
             </div>
 
             <button type="button" onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; display: block; width: 100%; margin-bottom: 10px;">
@@ -138,7 +135,7 @@
             <div id="section-emi" class="app-section">
                 <div class="balance-card">
                     <p>Bank EMI Calculator</p>
-                    <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_yzoqyyq2.json" background="transparent" speed="1" style="width: 80px; height: 80px; margin: 0 auto;" loop autoplay></lottie-player>
+                    <div class="anim-bank">🏦</div>
                 </div>
                 <div class="form-section">
                     <label>Loan Amount (Kitna loan liya?)</label>
@@ -199,7 +196,7 @@
             <div id="section-ration" class="app-section">
                 <div class="balance-card">
                     <p>Kirana & Ration</p>
-                    <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_pNx6yH.json" background="transparent" speed="1" style="width: 80px; height: 80px; margin: 0 auto;" loop autoplay></lottie-player>
+                    <div class="anim-cart">🛒</div>
                 </div>
                 <div class="form-section">
                     <label>Samaan ka naam aur Date:</label>
@@ -251,9 +248,9 @@
                 const splash = document.getElementById('splash-screen');
                 if(splash) {
                     splash.style.opacity = '0';
-                    setTimeout(() => { splash.style.display = 'none'; }, 400); // Completely remove from screen
+                    setTimeout(() => { splash.style.display = 'none'; }, 400); 
                 }
-            }, 1800); 
+            }, 1500); // 1.5 seconds splash screen
         });
     </script>
     
