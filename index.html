@@ -40,10 +40,10 @@
                 <input type="password" id="password-input" placeholder="Password (Min 6 letters)" style="padding: 12px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: inherit;">
             </div>
 
-            <button onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; display: block; width: 100%; margin-bottom: 10px;">
+            <button type="button" onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; display: block; width: 100%; margin-bottom: 10px;">
                 🚀 Login Karein
             </button>
-            <button onclick="registerWithEmail()" style="background: transparent; border: 1.5px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer;">
+            <button type="button" onclick="registerWithEmail()" style="background: transparent; border: 1.5px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer;">
                 Naya Account Banayein
             </button>
             <p id="login-status" style="margin-top: 15px; font-size: 12px; color: #ef4444; display: none; font-weight: bold;">Loading... ⏳</p>
@@ -59,8 +59,8 @@
                     <h2 id="app-title" style="margin: 0;">Ghar Ka Hisaab 💰</h2>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button id="theme-toggle" onclick="toggleTheme()" style="background: none; border: none; font-size: 24px; cursor: pointer;">🌙</button>
-                    <button onclick="logout()" style="background: transparent; border: none; font-size: 24px; cursor: pointer;" title="Logout">🚪</button>
+                    <button type="button" id="theme-toggle" onclick="toggleTheme()" style="background: none; border: none; font-size: 24px; cursor: pointer;">🌙</button>
+                    <button type="button" onclick="logout()" style="background: transparent; border: none; font-size: 24px; cursor: pointer;" title="Logout">🚪</button>
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
                 <div class="budget-section">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span class="result-text">Monthly Budget: ₹<span id="budget-display">20000</span></span>
-                        <button onclick="setBudget()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size: 12px; font-weight:bold;">✏️ Edit</button>
+                        <button type="button" onclick="setBudget()" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size: 12px; font-weight:bold;">✏️ Edit</button>
                     </div>
                     <div style="width:100%; background:#f1f5f9; border-radius:10px; height:8px; overflow:hidden;">
                         <div id="budget-bar" style="height:100%; width:0%; background:#10b981; transition:width 0.5s ease;"></div>
@@ -105,7 +105,7 @@
                     <label>Kharcha kis cheez par hua?</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                         <input type="text" id="description" placeholder="e.g., Sabji, Dawa" style="margin-bottom: 0;">
-                        <button id="mic-btn" onclick="startVoice()" style="background:transparent; color:#2563eb; border:1.5px solid #2563eb; border-radius:12px; padding:0 15px; cursor:pointer; font-size: 18px;">🎤</button>
+                        <button type="button" id="mic-btn" onclick="startVoice()" style="background:transparent; color:#2563eb; border:1.5px solid #2563eb; border-radius:12px; padding:0 15px; cursor:pointer; font-size: 18px;">🎤</button>
                     </div>
                     
                     <label>Kitne paise lage?</label>
@@ -114,7 +114,7 @@
                     <label>Kis din?</label>
                     <input type="date" id="date">
                     
-                    <button class="expense-btn" id="btn-add-expense" onclick="addExpense()">Kharcha Add Karein</button>
+                    <button type="button" class="expense-btn" id="btn-add-expense" onclick="addExpense()">Kharcha Add Karein</button>
                 </div>
 
                 <div class="history-section">
@@ -127,8 +127,8 @@
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <button onclick="exportToPDF()" style="flex:1; padding:12px; background:transparent; color:#ef4444; border:1.5px solid #ef4444; border-radius:12px; cursor:pointer; font-weight:bold;">📄 PDF</button>
-                        <button onclick="shareReport()" style="flex:1; padding:12px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">📤 Share</button>
+                        <button type="button" onclick="exportToPDF()" style="flex:1; padding:12px; background:transparent; color:#ef4444; border:1.5px solid #ef4444; border-radius:12px; cursor:pointer; font-weight:bold;">📄 PDF</button>
+                        <button type="button" onclick="shareReport()" style="flex:1; padding:12px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">📤 Share</button>
                     </div>
                     
                     <ul id="history-list"></ul>
@@ -147,7 +147,7 @@
                     <input type="number" id="emi-rate" placeholder="e.g., 10">
                     <label>Time (Kitne mahine ke liye?)</label>
                     <input type="number" id="emi-time" placeholder="e.g., 12">
-                    <button class="expense-btn" style="background:#f472b6;" onclick="calculateEMI()">EMI Nikalein</button>
+                    <button type="button" class="expense-btn" style="background:#f472b6;" onclick="calculateEMI()">EMI Nikalein</button>
                 </div>
                 <div class="result-card" id="emi-result" style="display:none; background:rgba(255,255,255,0.8); padding:20px; border-radius:16px; border:1.5px dashed #cbd5e1; margin-top:15px; text-align:center;">
                     <h3 style="color: #2c3e50; font-family:'Caveat', cursive; font-size:28px;">Har Mahine Ki EMI</h3>
@@ -167,7 +167,7 @@
                     <input type="number" id="vyaj-rate" placeholder="e.g., 5">
                     <label>Samay (Kitne mahine ho gaye?)</label>
                     <input type="number" id="vyaj-time" placeholder="e.g., 4">
-                    <button class="expense-btn" style="background:#4ade80;" onclick="calculateVyaj()">Vyaj Nikalein</button>
+                    <button type="button" class="expense-btn" style="background:#4ade80;" onclick="calculateVyaj()">Vyaj Nikalein</button>
                 </div>
                 <div class="result-card" id="vyaj-result" style="display:none; background:rgba(255,255,255,0.8); padding:20px; border-radius:16px; border:1.5px dashed #cbd5e1; margin-top:15px; text-align:center;">
                     <h3 style="color: #2c3e50; font-family:'Caveat', cursive; font-size:28px;">Sirf Vyaj (Interest)</h3>
@@ -188,7 +188,7 @@
                     <label>Kitna Dudh aaya?</label>
                     <input type="number" id="dudh-morning" placeholder="Subah (Max 5 Ltr)" step="0.1" min="0" max="5">
                     <input type="number" id="dudh-evening" placeholder="Shaam (Max 5 Ltr)" step="0.1" min="0" max="5">
-                    <button class="expense-btn" style="background:#60a5fa;" onclick="addDudh()">Dudh Add Karein</button>
+                    <button type="button" class="expense-btn" style="background:#60a5fa;" onclick="addDudh()">Dudh Add Karein</button>
                 </div>
                 <div class="history-section">
                     <h3>Daily Dudh Record</h3>
@@ -206,7 +206,7 @@
                     <input type="date" id="ration-date" style="margin-bottom: 10px;">
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="ration-item" placeholder="e.g., Chawal 5kg" style="margin-bottom: 0;">
-                        <button class="expense-btn" style="background:#c084fc; margin-top: 0; width: auto; padding: 0 20px;" onclick="addRation()">Add</button>
+                        <button type="button" class="expense-btn" style="background:#c084fc; margin-top: 0; width: auto; padding: 0 20px;" onclick="addRation()">Add</button>
                     </div>
                 </div>
                 <div class="history-section">
@@ -218,19 +218,19 @@
         </div>
 
         <div class="bottom-nav">
-            <button class="nav-btn active-nav" onclick="openSection('hisab', 'Ghar Ka Hisaab 💰')">
+            <button type="button" class="nav-btn active-nav" onclick="openSection('hisab', 'Ghar Ka Hisaab 💰')">
                 <i style="font-style: normal; font-size: 20px;">💰</i><span>Hisaab</span>
             </button>
-            <button class="nav-btn" onclick="openSection('emi', 'EMI Calculator 🏦')">
+            <button type="button" class="nav-btn" onclick="openSection('emi', 'EMI Calculator 🏦')">
                 <i style="font-style: normal; font-size: 20px;">🏦</i><span>EMI</span>
             </button>
-            <button class="nav-btn" onclick="openSection('vyaj', 'Gaon Ka Vyaj ₹')">
+            <button type="button" class="nav-btn" onclick="openSection('vyaj', 'Gaon Ka Vyaj ₹')">
                 <i style="font-style: normal; font-size: 20px;">₹</i><span>Vyaj</span>
             </button>
-            <button class="nav-btn" onclick="openSection('dudh', 'Dudh 🥛')">
+            <button type="button" class="nav-btn" onclick="openSection('dudh', 'Dudh 🥛')">
                 <i style="font-style: normal; font-size: 20px;">🥛</i><span>Dudh</span>
             </button>
-            <button class="nav-btn" onclick="openSection('ration', 'Ration 🛒')">
+            <button type="button" class="nav-btn" onclick="openSection('ration', 'Ration 🛒')">
                 <i style="font-style: normal; font-size: 20px;">🛒</i><span>Ration</span>
             </button>
         </div>
@@ -252,10 +252,9 @@
                 splash.style.opacity = '0';
                 setTimeout(() => {
                     splash.style.display = 'none';
-                    // Check login status here to show app or login
                     document.getElementById(localStorage.getItem('familyAppUser') ? 'main-app' : 'login-screen').style.display = 'block';
                 }, 500);
-            }, 2000); // 2 second ki splash screen
+            }, 2000); 
         });
     </script>
     
