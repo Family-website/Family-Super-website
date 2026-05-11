@@ -1,5 +1,5 @@
 /* ==========================================
-   🔤 1. CRISP TYPOGRAPHY
+   🔤 1. CRISP TYPOGRAPHY & VARIABLES
 ================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
 
@@ -234,28 +234,29 @@ body.dark-mode .lock-card { background-color: #1e293b; border-color: #334155; }
 body.dark-mode .member-badge, body.dark-mode .category-badge { background: #334155; color: #cbd5e1; }
 
 /* ==========================================
-   ✨ 13. 100% OFFLINE CSS ANIMATIONS 
+   ✨ 13. PREMIUM SKETCH ICON ANIMATIONS
 ================================================ */
-@keyframes bounceCloud {
-    0%, 100% { transform: translateY(0); text-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    50% { transform: translateY(-15px); text-shadow: 0 25px 20px rgba(0,0,0,0.05); }
-}
-@keyframes pulseLock {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-@keyframes swingBank {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(8deg); }
-    75% { transform: rotate(-8deg); }
-}
-@keyframes moveCart {
-    0% { transform: translateX(-10px); }
-    50% { transform: translateX(10px); }
-    100% { transform: translateX(-10px); }
+@keyframes premiumBreath {
+    0%, 100% { 
+        transform: translateY(0) scale(1); 
+        opacity: 0.9; 
+    }
+    50% { 
+        transform: translateY(-6px) scale(1.05); 
+        opacity: 1; 
+        text-shadow: 0 15px 25px rgba(37, 99, 235, 0.25); 
+    }
 }
 
-.anim-cloud { font-size: 85px; animation: bounceCloud 3s ease-in-out infinite; margin-bottom: 10px; }
-.anim-lock { font-size: 70px; animation: pulseLock 2s ease-in-out infinite; margin-bottom: 5px; }
-.anim-bank { font-size: 65px; animation: swingBank 3s ease-in-out infinite; margin-bottom: 5px; }
-.anim-cart { font-size: 65px; animation: moveCart 3s ease-in-out infinite; margin-bottom: 5px; display: inline-block; }
+.anim-premium-icon {
+    font-size: 85px !important;
+    color: var(--ink-blue);
+    animation: premiumBreath 3.5s ease-in-out infinite;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+body.dark-mode .anim-premium-icon {
+    color: #f1f5f9;
+    text-shadow: 0 15px 25px rgba(255, 255, 255, 0.15);
+}
