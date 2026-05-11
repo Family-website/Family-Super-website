@@ -28,16 +28,11 @@ const mainApp = document.getElementById('main-app');
 const loginStatus = document.getElementById('login-status');
 
 auth.onAuthStateChanged(async (user) => {
-    // Splash screen hatao
-    const splash = document.getElementById('splash-screen');
-    if(splash) splash.style.display = 'none';
-
     if (user) {
         currentUser = user;
         if(loginStatus) {
             loginStatus.style.display = 'block';
             loginStatus.innerText = "Cloud se data laa rahe hain... ⏳";
-            loginStatus.style.color = "#2563eb";
         }
         document.getElementById('smart-greeting').innerText = `Hello, ${user.displayName.split(" ")[0]}! ✨`;
         
@@ -48,21 +43,19 @@ auth.onAuthStateChanged(async (user) => {
         await syncOldLocalData();
         
         // UI Dikhao
-        if(loginScreen) loginScreen.style.opacity = "0";
+        loginScreen.style.opacity = "0";
         setTimeout(() => {
-            if(loginScreen) loginScreen.style.display = 'none';
-            if(mainApp) mainApp.style.display = 'block';
+            loginScreen.style.display = 'none';
+            mainApp.style.display = 'block';
             renderHistoryWithSkeleton(); 
             updateDudhUI();
             updateRationUI();
         }, 300);
     } else {
         currentUser = null;
-        if(mainApp) mainApp.style.display = 'none';
-        if(loginScreen) {
-            loginScreen.style.display = 'flex';
-            loginScreen.style.opacity = "1";
-        }
+        mainApp.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        loginScreen.style.opacity = "1";
         if(loginStatus) loginStatus.style.display = 'none';
     }
 });
@@ -194,7 +187,7 @@ const now = new Date();
 const todayDateString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
 // ==========================================
-// 💰 5. HISAAB SECTION
+// 💰 5. HISAAB SECTION & RECEIPT UPLOAD
 // ==========================================
 let editExpenseIndex = -1;
 let currentReceiptUrl = ""; 
@@ -205,6 +198,24 @@ const dateInput = document.getElementById('date');
 if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter');
 if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
+
+// 🔥 RECEIPT IMAGE READER LOGIC
+const receiptInput = document.getElementById('receipt-img');
+if(receiptInput) {
+    receiptInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                currentReceiptUrl = event.target.result;
+                const preview = document.getElementById('receipt-preview');
+                preview.src = currentReceiptUrl;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 
 function setBudget() {
     Swal.fire({ title: 'Monthly Budget', input: 'number', inputValue: budgetLimit, showCancelButton: true }).then((result) => {
@@ -260,6 +271,7 @@ function updateHisabUI() {
 
                 const originalIndex = familyExpenses.indexOf(item);
                 const li = document.createElement('li');
+                let receiptHTML = item.receipt ? `<img src="${item.receipt}" class="receipt-thumb" style="width:30px; height:30px; border-radius:5px; object-fit:cover; margin-right:5px; cursor:pointer;" onclick="Swal.fire({imageUrl: '${item.receipt}', imageWidth: '100%'})">` : '';
 
                 li.innerHTML = `
                     <div class="list-left">
@@ -270,6 +282,7 @@ function updateHisabUI() {
                         </div>
                     </div>
                     <div class="list-right">
+                        ${receiptHTML}
                         <span style="font-weight: 800; color: #e74c3c; font-size: 20px; margin: 0 5px;">₹${item.amount}</span> 
                         <button class="action-btn edit" onclick="editExpense(${originalIndex})" title="Edit">✏️</button>
                         <button class="action-btn delete" onclick="deleteExpense(${originalIndex})" title="Delete">🗑️</button>
@@ -333,8 +346,11 @@ function addExpense() {
     }
 
     saveToCloud(); 
-    document.getElementById('description').value = ''; document.getElementById('amount').value = ''; 
+    document.getElementById('description').value = ''; 
+    document.getElementById('amount').value = ''; 
     currentReceiptUrl = ""; 
+    document.getElementById('receipt-preview').style.display = 'none';
+    if(receiptInput) receiptInput.value = "";
     renderHistoryWithSkeleton();
 }
 
@@ -363,7 +379,7 @@ function deleteExpense(index) {
 // ==========================================
 // 🥛 6. DUDH & RATION SECTIONS
 // ==========================================
-let editDudhIndex = -1;
+ let editDudhIndex = -1;
 const dudhDateInput = document.getElementById('dudh-date'); if(dudhDateInput) dudhDateInput.value = todayDateString;
 
 function updateDudhUI() {
@@ -452,7 +468,7 @@ function calculateVyaj() {
 }
 
 // ==========================================
-// 📤 8. SHARE PDF REPORT SYSTEM 
+// 📤 8. SHARE PDF & BACKUP/RESTORE SYSTEM 
 // ==========================================
 async function shareReport() {
     if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
@@ -495,6 +511,53 @@ async function shareReport() {
         Swal.fire('Download Ho Gaya', 'Aapka browser direct PDF share karna support nahi karta. File download ho gayi hai.', 'info');
         doc.save(fileName); 
     }
+}
+
+function exportToPDF() { shareReport(); /* Temporary linking both to same logic */ }
+
+// 🔥 BACKUP DATA TO JSON FILE
+function backupData() {
+    const dataToBackup = {
+        expenses: familyExpenses,
+        dudh: dudhRecords,
+        ration: rationItems,
+        budget: budgetLimit
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "Family_Cloud_Backup.json");
+    dlAnchorElem.click();
+}
+
+// 🔥 RESTORE DATA FROM JSON FILE
+function restoreData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.expenses || data.dudh || data.ration) {
+                familyExpenses = data.expenses || [];
+                dudhRecords = data.dudh || [];
+                rationItems = data.ration || [];
+                budgetLimit = data.budget || 20000;
+                
+                await saveToCloud();
+                
+                Swal.fire('Restored!', 'Aapka purana data wapas aa gaya hai! ✅', 'success');
+                renderHistoryWithSkeleton();
+                updateDudhUI();
+                updateRationUI();
+            } else {
+                Swal.fire('Error', 'Yeh file sahi format mein nahi hai!', 'error');
+            }
+        } catch(err) {
+            Swal.fire('Error', 'File read nahi ho paayi.', 'error');
+        }
+    };
+    reader.readAsText(file);
 }
 
 // ==========================================
