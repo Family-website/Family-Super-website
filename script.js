@@ -11,7 +11,6 @@ const firebaseConfig = {
   measurementId: "G-0E3C8289HF"
 };
 
-// Initialize Firebase 
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -21,16 +20,11 @@ const db = firebase.firestore();
 let currentUser = null;
 
 // ==========================================
-// 🔐 2. GOOGLE LOGIN SYSTEM
+// 🔐 2. GOOGLE LOGIN SYSTEM (CHROME FIX: POPUP)
 // ==========================================
 const loginScreen = document.getElementById('login-screen');
 const mainApp = document.getElementById('main-app');
 const loginStatus = document.getElementById('login-status');
-
-auth.getRedirectResult().catch((error) => {
-    if(loginStatus) loginStatus.style.display = 'none';
-    Swal.fire('Login Error', error.message, 'error');
-});
 
 auth.onAuthStateChanged(async (user) => {
     const splash = document.getElementById('splash-screen');
@@ -44,7 +38,6 @@ auth.onAuthStateChanged(async (user) => {
         }
         document.getElementById('smart-greeting').innerText = `Hello, ${user.displayName.split(" ")[0]}! ✨`;
         
-        // Data Load Karo
         loadCloudData(user.uid);
         await syncOldLocalData();
         
@@ -64,13 +57,17 @@ auth.onAuthStateChanged(async (user) => {
     }
 });
 
+// 🔥 CHROME FIX: Popup window se login
 function loginWithGoogle() {
     if(loginStatus) {
         loginStatus.style.display = 'block';
-        loginStatus.innerText = "Google par jaa rahe hain... ⏳";
+        loginStatus.innerText = "Google se connect kar rahe hain... ⏳";
     }
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider); 
+    auth.signInWithPopup(provider).catch((error) => {
+        if(loginStatus) loginStatus.style.display = 'none';
+        Swal.fire('Login Error', error.message, 'error');
+    });
 }
 
 function logout() {
@@ -98,7 +95,6 @@ function loadCloudData(uid) {
     try {
         const docRef = db.collection('familyData').doc(uid);
         
-        // 🔄 Real-time Update
         docRef.onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
@@ -111,12 +107,11 @@ function loadCloudData(uid) {
                 updateDudhUI();
                 updateRationUI();
             } else {
-                console.log("Abhi cloud par koi data nahi hai.");
                 updateHisabUI();
             }
         }, (error) => {
             console.error("Cloud fetch failed:", error);
-            Swal.fire('Database Error!', 'Firebase Rules lock hain. ' + error.message, 'error');
+            Swal.fire('Database Error!', 'Connection block ho raha hai. ' + error.message, 'error');
         });
     } catch (error) {
         console.error("Cloud fetch exception:", error);
@@ -202,7 +197,6 @@ if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter');
 if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
 
-// Receipt Upload
 const receiptInput = document.getElementById('receipt-img');
 if(receiptInput) {
     receiptInput.addEventListener('change', function(e) {
@@ -350,7 +344,7 @@ function deleteExpense(index) {
 }
 
 // ==========================================
-// 🛒 6. RATION LOGIC (WITH SMART AUTO-EXPENSE)
+// 🛒 6. RATION LOGIC
 // ==========================================
 const rationDateInput = document.getElementById('ration-date'); if(rationDateInput) rationDateInput.value = todayDateString;
 
@@ -394,12 +388,10 @@ function addRation() {
     updateRationUI(); 
 }
 
-// 🔥 SMART JADU: Ration tick karne par Hisaab mein add ho jayega
 async function toggleRation(index) { 
     const item = rationItems[index];
     item.bought = !item.bought; 
     
-    // Agar saman liya (tick) aur amount hai, to hisaab me jodo
     if (item.bought && item.amount > 0) {
         const autoExpense = {
             member: "Aditya", 
