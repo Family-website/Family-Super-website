@@ -549,6 +549,59 @@ function restoreData(event) {
     };
     reader.readAsText(file);
 }
+// ==========================================
+// 💾 BACKUP & RESTORE SYSTEM
+// ==========================================
+
+// 1. Data Download Karne Ke Liye (Backup)
+function backupData() {
+    const dataToBackup = {
+        expenses: familyExpenses,
+        dudh: dudhRecords,
+        ration: rationItems,
+        budget: budgetLimit
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", "Family_Cloud_Backup.json");
+    dlAnchorElem.click();
+}
+
+// 2. Data Wapas Daalne Ke Liye (Restore)
+function restoreData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.expenses || data.dudh || data.ration) {
+                familyExpenses = data.expenses || [];
+                dudhRecords = data.dudh || [];
+                rationItems = data.ration || [];
+                budgetLimit = data.budget || 20000;
+                
+                // Restore hote hi seedha Cloud par bhej do!
+                await saveToCloud(); 
+                
+                Swal.fire('Restored!', 'Aapka purana data wapas aa gaya hai aur Cloud par save ho gaya hai! ✅', 'success');
+                
+                // UI update karo
+                renderHistoryWithSkeleton();
+                updateDudhUI();
+                updateRationUI();
+            } else {
+                Swal.fire('Error', 'Yeh file sahi format mein nahi hai!', 'error');
+            }
+        } catch(err) {
+            Swal.fire('Error', 'File read nahi ho paayi.', 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
 
 // ==========================================
 // 🎙️ 9. VOICE TYPING (JADU!)
