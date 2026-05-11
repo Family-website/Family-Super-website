@@ -1,563 +1,262 @@
 // ==========================================
-// 🔥 1. FIREBASE SETUP & CLOUD ENGINE
+// ☁️ 1. FIREBASE INITIALIZATION & AUTH
 // ==========================================
-const firebaseConfig = {
-  apiKey: "AIzaSyCej-idbSFHr3WVokG3sdpmdWPWgz5PkQk",
-  authDomain: "super-family-appp.firebaseapp.com",
-  projectId: "super-family-appp",
-  storageBucket: "super-family-appp.firebasestorage.app",
-  messagingSenderId: "250506329447",
-  appId: "1:250506329447:web:cf9ac2e4d6d24b37e903c2"
-};
-
-firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser = null;
-
-// ==========================================
-// 🔐 2. EMAIL / PASSWORD AUTH SYSTEM
-// ==========================================
-const loginScreen = document.getElementById('login-screen');
-const mainApp = document.getElementById('main-app');
-const loginStatus = document.getElementById('login-status');
-
-// Yahan se Firebase yaad rakhega ki tum login ho chuke ho
-auth.onAuthStateChanged(async (user) => {
+// Check Login Status on Page Load
+auth.onAuthStateChanged((user) => {
     if (user) {
-        currentUser = user;
-        if(loginStatus) {
-            loginStatus.style.display = 'block';
-            loginStatus.innerText = "Cloud data laa rahe hain... ⏳";
-        }
-        document.getElementById('smart-greeting').innerText = `Hello! ✨`;
-        
-        await loadCloudData(user.uid);
-        await syncOldLocalData();
-        
-        loginScreen.style.opacity = "0";
-        setTimeout(() => {
-            loginScreen.style.display = 'none';
-            mainApp.style.display = 'block';
-            renderHistoryWithSkeleton(); 
-            updateDudhUI();
-            updateRationUI();
-        }, 300);
+        // User is logged in
+        localStorage.setItem('familyAppUser', user.email);
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('smart-greeting').innerText = `Hello, ${user.email.split('@')[0]}! ✨`;
+        loadAllData(user.email); // Database se saara data lao
     } else {
-        currentUser = null;
-        mainApp.style.display = 'none';
-        loginScreen.style.display = 'flex';
-        loginScreen.style.opacity = "1";
-        if(loginStatus) loginStatus.style.display = 'none';
+        // User is logged out
+        localStorage.removeItem('familyAppUser');
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
     }
 });
 
+// LOGIN FUNCTION
+function loginWithEmail() {
+    const email = document.getElementById('email-input').value;
+    const password = document.getElementById('password-input').value;
+    const btn = document.querySelector("#login-screen .expense-btn");
+
+    if (!email || password.length < 6) {
+        Swal.fire('Opps!', 'Sahi email aur 6 akshar ka password daalein', 'warning');
+        return;
+    }
+
+    btn.innerText = "Cloud data laa rahe hain... ⏳";
+    btn.disabled = true;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .catch((error) => {
+            btn.innerText = "🚀 Login Karein";
+            btn.disabled = false;
+            Swal.fire('Error!', 'Email ya Password galat hai!', 'error');
+        });
+}
+
+// REGISTER FUNCTION
 function registerWithEmail() {
     const email = document.getElementById('email-input').value;
     const password = document.getElementById('password-input').value;
 
     if (!email || password.length < 6) {
-        return Swal.fire('Error', 'Sahi email daaliye aur password kam se kam 6 akshar ka hona chahiye!', 'error');
+        Swal.fire('Halt!', 'Naya account banane ke liye sahi details bharein', 'info');
+        return;
     }
 
-    loginStatus.style.display = 'block';
-    loginStatus.innerText = "Account ban raha hai... ⏳";
-
-    auth.createUserWithEmailAndPassword(email, password).then((userCredential) => {
-        Swal.fire('Success', 'Naya account ban gaya!', 'success');
-    }).catch((error) => {
-        Swal.fire('Error', error.message, 'error');
-        loginStatus.style.display = 'none';
-    });
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(() => Swal.fire('Mubarak ho!', 'Aapka Family Cloud Account ban gaya!', 'success'))
+        .catch((error) => Swal.fire('Oops!', error.message, 'error'));
 }
 
-function loginWithEmail() {
-    const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value;
-
-    if (!email || !password) {
-        return Swal.fire('Error', 'Kripya Email aur Password dono daalein!', 'warning');
-    }
-
-    loginStatus.style.display = 'block';
-    loginStatus.innerText = "Login ho raha hai... ⏳";
-
-    auth.signInWithEmailAndPassword(email, password).catch((error) => {
-        Swal.fire('Login Error', 'Email ya Password galat hai.', 'error');
-        loginStatus.style.display = 'none';
-    });
-}
-
+// LOGOUT
 function logout() {
     Swal.fire({
         title: 'Logout?',
-        text: "Kya aap sach mein logout karna chahte hain?",
-        icon: 'warning',
+        text: "Kya aap sach mein bahar jaana chahte hain?",
+        icon: 'question',
         showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        confirmButtonText: 'Yes, Logout'
+        confirmButtonColor: '#2563eb',
+        confirmButtonText: 'Haan, Niklo!'
     }).then((result) => {
-        if (result.isConfirmed) {
-            auth.signOut();
-        }
+        if (result.isConfirmed) auth.signOut();
     });
 }
 
 // ==========================================
-// ☁️ 3. CLOUD DATA SYNC & LOCAL MIGRATION
+// 💰 2. HISAAB (EXPENSES) LOGIC
 // ==========================================
-let familyExpenses = [];
-let dudhRecords = [];
-let rationItems = [];
-let budgetLimit = 20000;
+let allExpenses = [];
 
-async function loadCloudData(uid) {
-    try {
-        const docRef = db.collection('familyData').doc(uid);
-        const doc = await docRef.get();
-        if (doc.exists) {
-            const data = doc.data();
-            familyExpenses = data.expenses || [];
-            dudhRecords = data.dudh || [];
-            rationItems = data.ration || [];
-            budgetLimit = data.budget || 20000;
-        }
-    } catch (error) {
-        console.error("Cloud fetch failed:", error);
-    }
-}
+async function addExpense() {
+    const user = auth.currentUser;
+    if (!user) return;
 
-async function saveToCloud() {
-    if(!currentUser) return;
-    try {
-        await db.collection('familyData').doc(currentUser.uid).set({
-            expenses: familyExpenses,
-            dudh: dudhRecords,
-            ration: rationItems,
-            budget: budgetLimit
-        }, { merge: true });
-    } catch (error) {
-        console.error("Cloud save failed:", error);
-    }
-}
-
-async function syncOldLocalData() {
-    try {
-        const localExp = JSON.parse(localStorage.getItem('familyExpenses'));
-        const localDudh = JSON.parse(localStorage.getItem('dudhRecords'));
-        const localRation = JSON.parse(localStorage.getItem('rationItems'));
-        
-        let dataChanged = false;
-
-        if (localExp && localExp.length > 0 && familyExpenses.length === 0) {
-            familyExpenses = localExp; dataChanged = true;
-        }
-        if (localDudh && localDudh.length > 0 && dudhRecords.length === 0) {
-            dudhRecords = localDudh; dataChanged = true;
-        }
-        if (localRation && localRation.length > 0 && rationItems.length === 0) {
-            rationItems = localRation; dataChanged = true;
-        }
-
-        if (dataChanged) {
-            await saveToCloud();
-            localStorage.removeItem('familyExpenses');
-            localStorage.removeItem('dudhRecords');
-            localStorage.removeItem('rationItems');
-        }
-    } catch(e) {}
-}
-
-// ==========================================
-// 🎨 4. APP LOGIC & UI (Theme, Nav)
-// ==========================================
-let isDarkMode = localStorage.getItem('darkMode') === 'true';
-if(isDarkMode) document.body.classList.add('dark-mode');
-const themeBtn = document.getElementById('theme-toggle');
-if(themeBtn) themeBtn.innerText = isDarkMode ? '☀️' : '🌙';
-
-function toggleTheme() {
-    isDarkMode = !isDarkMode;
-    document.body.classList.toggle('dark-mode', isDarkMode);
-    document.getElementById('theme-toggle').innerText = isDarkMode ? '☀️' : '🌙';
-    localStorage.setItem('darkMode', isDarkMode);
-    if(categoryChartInstance) renderHistoryWithSkeleton(); 
-}
-
-function openSection(sectionName, title) {
-    document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active-section'));
-    document.getElementById('section-' + sectionName).classList.add('active-section');
-    document.getElementById('app-title').innerText = title;
-    
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active-nav');
-        if(btn.getAttribute('onclick').includes(`'${sectionName}'`)) {
-            btn.classList.add('active-nav');
-        }
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-}
-
-const now = new Date();
-const todayDateString = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-
-// ==========================================
-// 💰 5. HISAAB SECTION
-// ==========================================
-let editExpenseIndex = -1;
-let currentReceiptUrl = ""; 
-let categoryChartInstance = null; let memberChartInstance = null; 
-
-const dateInput = document.getElementById('date');
-if(dateInput) dateInput.value = todayDateString;
-const monthFilter = document.getElementById('month-filter');
-if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
-
-function setBudget() {
-    Swal.fire({ title: 'Monthly Budget', input: 'number', inputValue: budgetLimit, showCancelButton: true }).then((result) => {
-        if (result.isConfirmed && result.value > 0) { 
-            budgetLimit = result.value; 
-            saveToCloud(); 
-            renderHistoryWithSkeleton(); 
-        }
-    });
-}
-
-function renderHistoryWithSkeleton() {
-    const list = document.getElementById('history-list');
-    if(!list) return;
-    list.innerHTML = `<div class="skeleton-box"></div><div class="skeleton-box"></div>`;
-    setTimeout(updateHisabUI, 400); 
-}
-
-function updateHisabUI() {
-    const list = document.getElementById('history-list');
-    if(!list) return;
-    list.innerHTML = ''; 
-    
-    const filterMonth = document.getElementById('month-filter').value || todayDateString.slice(0, 7);
-    const budgetDisplay = document.getElementById('budget-display');
-    if(budgetDisplay) budgetDisplay.innerText = budgetLimit;
-
-    const filteredExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
-    let totalExpense = 0; let categoryTotals = { "Ration": 0, "Medical": 0, "Petrol": 0, "Shopping": 0, "Bills": 0, "Other": 0 }; let memberTotals = {};
-
-    const uniqueDates = [...new Set(filteredExpenses.map(item => item.date))].sort((a, b) => new Date(b) - new Date(a));
-
-    uniqueDates.forEach(dateStr => {
-        const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); 
-        const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-
-        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.innerText = `📅 ${showDate}`;
-        list.appendChild(dateHeader);
-
-        filteredExpenses.forEach((item) => {
-            if (item.date === dateStr) {
-                totalExpense += item.amount;
-                let cat = item.category || "Other"; if(categoryTotals[cat] !== undefined) categoryTotals[cat] += item.amount;
-                let mem = item.member || "Unknown"; if(!memberTotals[mem]) memberTotals[mem] = 0; memberTotals[mem] += item.amount;
-
-                const originalIndex = familyExpenses.indexOf(item);
-                const li = document.createElement('li');
-                let receiptHTML = item.receipt ? `<img src="${item.receipt}" class="receipt-thumb" onclick="Swal.fire({imageUrl: '${item.receipt}', imageWidth: '100%'})">` : '';
-
-                li.innerHTML = `
-                    <div class="list-left">
-                        <div style="display: flex; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 5px;">
-                            <span class="member-badge">👤 ${item.member}</span> 
-                            <span class="category-badge cat-${cat}">${cat}</span>
-                        </div>
-                        <strong style="font-size: 15px;">${item.description}</strong>
-                    </div>
-                    <div class="list-right">
-                        ${receiptHTML}
-                        <span style="font-weight: 800; color: #e74c3c; font-size: 17px; margin: 0 5px;">₹${item.amount}</span> 
-                        <button class="action-btn edit" onclick="editExpense(${originalIndex})" title="Edit">✏️</button>
-                        <button class="action-btn delete" onclick="deleteExpense(${originalIndex})" title="Delete">🗑️</button>
-                    </div>
-                `;
-                list.appendChild(li);
-            }
-        });
-    });
-
-    const totalEl = document.getElementById('total-expense');
-    if(totalEl) totalEl.innerText = `₹${totalExpense}`;
-
-    let budgetPercent = (totalExpense / budgetLimit) * 100;
-    if(budgetPercent > 100) budgetPercent = 100;
-    const bar = document.getElementById('budget-bar'); 
-    if(bar) {
-        bar.style.width = `${budgetPercent}%`;
-        if(budgetPercent < 50) bar.style.background = '#2ecc71'; else if(budgetPercent < 80) bar.style.background = '#f39c12'; else { bar.style.background = '#e74c3c'; document.getElementById('budget-warning').style.display = 'block'; }
-        if(budgetPercent < 80) document.getElementById('budget-warning').style.display = 'none';
-    }
-
-    renderCategoryChart(categoryTotals); renderMemberChart(memberTotals);
-}
-
-function renderCategoryChart(dataObj) {
-    const ctx = document.getElementById('categoryChart'); if(!ctx) return;
-    if(categoryChartInstance) categoryChartInstance.destroy(); 
-    const labels = Object.keys(dataObj); const data = Object.values(dataObj); const hasData = data.some(val => val > 0); const textColor = isDarkMode ? '#fff' : '#333';
-    categoryChartInstance = new Chart(ctx.getContext('2d'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#f2994a', '#eb3349', '#4b6cb7', '#b06ab3', '#f8b500', '#bdc3c7'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#111' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: textColor, font: {size: 11} } } } } });
-}
-
-function renderMemberChart(dataObj) {
-    const ctx = document.getElementById('memberChart'); if(!ctx) return;
-    if(memberChartInstance) memberChartInstance.destroy(); 
-    const labels = Object.keys(dataObj); const data = Object.values(dataObj); const hasData = data.some(val => val > 0); const textColor = isDarkMode ? '#fff' : '#333';
-    memberChartInstance = new Chart(ctx.getContext('2d'), { type: 'pie', data: { labels: labels, datasets: [{ data: hasData ? data : [1], backgroundColor: hasData ? ['#2980b9', '#e84393', '#27ae60', '#8e44ad', '#16a085'] : ['#ecf0f1'], borderWidth: 2, borderColor: isDarkMode ? '#111' : '#fff' }] }, options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor, font: {size: 12, weight: 'bold'} } } } } });
-}
-
-function addExpense() {
-    const member = document.getElementById('member-name').value;
-    const category = document.getElementById('expense-category').value;
     const desc = document.getElementById('description').value;
-    const amt = parseFloat(document.getElementById('amount').value);
-    const date = document.getElementById('date').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+    const category = document.getElementById('expense-category').value;
+    const member = document.getElementById('member-name').value;
+    const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
 
-    if (!desc || isNaN(amt) || amt <= 0 || !date) return Swal.fire('Oops...', 'Sahi details bhariye!', 'warning');
-    const newRecord = { member, category, description: desc, amount: amt, date, receipt: currentReceiptUrl };
-
-    if(editExpenseIndex === -1) {
-        familyExpenses.push(newRecord);
-        if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
-    } else {
-        familyExpenses[editExpenseIndex] = newRecord;
-        editExpenseIndex = -1;
-        document.getElementById('btn-add-expense').innerText = "Kharcha Add Karein";
-        Swal.fire('Updated!', 'Update ho gaya.', 'success');
+    if (!desc || !amount) {
+        Swal.fire('Khali hai!', 'Description aur Amount bharna zaroori hai', 'warning');
+        return;
     }
 
-    saveToCloud(); 
-    document.getElementById('description').value = ''; document.getElementById('amount').value = ''; 
-    currentReceiptUrl = ""; 
-    renderHistoryWithSkeleton();
+    const newExpense = { desc, amount, category, member, date, timestamp: Date.now() };
+
+    try {
+        await db.collection('users').doc(user.email).collection('expenses').add(newExpense);
+        document.getElementById('description').value = '';
+        document.getElementById('amount').value = '';
+        
+        // Success Sound & Confetti
+        document.getElementById('sound-success').play();
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        
+        Swal.fire({ title: 'Hisaab Likha Gaya!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+    } catch (e) {
+        Swal.fire('Error', 'Data save nahi hua!', 'error');
+    }
 }
 
-function editExpense(index) {
-    const item = familyExpenses[index];
-    document.getElementById('member-name').value = item.member || 'Aditya';
-    document.getElementById('expense-category').value = item.category || 'Other';
-    document.getElementById('description').value = item.description;
-    document.getElementById('amount').value = item.amount;
-    document.getElementById('date').value = item.date;
-    editExpenseIndex = index;
-    document.getElementById('btn-add-expense').innerText = "Update Kharcha ✏️";
-    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-}
-
-function deleteExpense(index) {
-    Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Haan!' }).then((result) => {
-        if (result.isConfirmed) { 
-            familyExpenses.splice(index, 1); 
-            saveToCloud(); 
-            renderHistoryWithSkeleton(); 
-        }
-    });
-}
-
-function exportToPDF() {
-    if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
-    const filterMonth = document.getElementById('month-filter').value;
-    const dataToExport = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
-    if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai.', 'info');
-
-    const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
-    const tableColumn = ["Date", "Name", "Category", "Details", "Amount"]; const tableRows = []; let totalAmount = 0;
-    [...dataToExport].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(exp => { const p = exp.date.split('-'); tableRows.push([`${p[2]}/${p[1]}`, exp.member || '-', exp.category || 'Other', exp.description, `Rs ${exp.amount}`]); totalAmount += exp.amount; });
-    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
-    doc.save(`Hisaab_${filterMonth}.pdf`);
-}
-
-// ==========================================
-// 🥛 6. DUDH & RATION SECTIONS
-// ==========================================
-let editDudhIndex = -1;
-const dudhDateInput = document.getElementById('dudh-date'); if(dudhDateInput) dudhDateInput.value = todayDateString;
-
-function updateDudhUI() {
-    const list = document.getElementById('dudh-list'); if(!list) return; list.innerHTML = ''; let totalLiter = 0, totalBill = 0;
-    dudhRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-    dudhRecords.forEach((record, index) => {
-        const totalDayLiter = record.morning + record.evening; const dayCost = totalDayLiter * record.rate; totalLiter += totalDayLiter; totalBill += dayCost;
-        const parts = record.date.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const li = document.createElement('li'); li.style.borderLeftColor = '#3498db'; 
-        li.innerHTML = `
-            <div class="list-left"><div style="display:flex; align-items:center; margin-bottom:6px;"><span class="member-badge" style="background:#e0f2fe; color:#3498db;">📅 ${showDate}</span><strong style="font-size:15px;">S: ${record.morning}L | Sh: ${record.evening}L</strong></div><div style="font-size:12px; color:#64748b; font-weight:600;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div></div>
-            <div class="list-right">
-                <span style="font-weight:800; color:#3498db; font-size:19px; margin-right:5px;">₹${dayCost}</span>
-                <button class="action-btn edit" onclick="editDudh(${index})">✏️</button>
-                <button class="action-btn delete" onclick="deleteDudh(${index})">🗑️</button>
-            </div>`;
-        list.appendChild(li);
-    });
-    document.getElementById('dudh-total-liter').innerText = totalLiter.toFixed(2); document.getElementById('dudh-total-bill').innerText = `₹${Math.round(totalBill)}`;
-}
-
-function addDudh() {
-    const dDate = document.getElementById('dudh-date').value; const rate = parseFloat(document.getElementById('dudh-rate').value); const morn = parseFloat(document.getElementById('dudh-morning').value) || 0; const eve = parseFloat(document.getElementById('dudh-evening').value) || 0;
-    if (!dDate || isNaN(rate) || (morn === 0 && eve === 0)) return Swal.fire('Galti', 'Sahi details daaliye!', 'error');
-    if(editDudhIndex === -1) { dudhRecords.push({ date: dDate, rate: rate, morning: morn, evening: eve }); } 
-    else { dudhRecords[editDudhIndex] = { date: dDate, rate: rate, morning: morn, evening: eve }; editDudhIndex = -1; document.getElementById('btn-add-dudh').innerText = "Dudh Add Karein"; }
-    
-    saveToCloud(); 
-    updateDudhUI(); 
-    document.getElementById('dudh-morning').value = ''; document.getElementById('dudh-evening').value = '';
-}
-function editDudh(index) { const item = dudhRecords[index]; document.getElementById('dudh-date').value = item.date; document.getElementById('dudh-rate').value = item.rate; document.getElementById('dudh-morning').value = item.morning; document.getElementById('dudh-evening').value = item.evening; editDudhIndex = index; document.getElementById('btn-add-dudh').innerText = "Update Dudh ✏️"; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function deleteDudh(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true }).then((result) => { if (result.isConfirmed) { dudhRecords.splice(index, 1); saveToCloud(); updateDudhUI(); } }); }
-
-const rationDateInput = document.getElementById('ration-date'); if(rationDateInput) rationDateInput.value = todayDateString;
-
-function updateRationUI() {
-    const list = document.getElementById('ration-list'); if(!list) return; list.innerHTML = '';
-    rationItems.sort((a, b) => new Date(b.date) - new Date(a.date)); const uniqueDates = [...new Set(rationItems.map(item => item.date))];
-    uniqueDates.forEach(dateStr => {
-        const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.innerText = `🛒 ${showDate}`; list.appendChild(dateHeader);
-        rationItems.forEach((item, index) => {
-            if(item.date === dateStr) {
-                const li = document.createElement('li'); li.style.borderLeftColor = '#8e44ad';
-                li.innerHTML = `
-                    <div class="list-left ration-item ${item.bought ? 'bought' : ''}" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer;">
-                        <div class="checkbox-custom"></div><strong style="font-size: 16px;">${item.name}</strong>
-                    </div>
-                    <div class="list-right"><button class="action-btn delete" onclick="deleteRation(${index})">🗑️</button></div>`;
-                list.appendChild(li);
-            }
+function loadAllData(email) {
+    // Real-time listener for Expenses
+    db.collection('users').doc(email).collection('expenses').orderBy('date', 'desc')
+        .onSnapshot((snapshot) => {
+            allExpenses = [];
+            snapshot.forEach(doc => allExpenses.push({ id: doc.id, ...doc.data() }));
+            renderHistory();
+            updateCharts();
         });
-    });
 }
-function addRation() { const name = document.getElementById('ration-item').value; const rDate = document.getElementById('ration-date').value; if(!name || !rDate) return; rationItems.push({ name: name, bought: false, date: rDate }); saveToCloud(); document.getElementById('ration-item').value = ''; updateRationUI(); }
-function toggleRation(index) { rationItems[index].bought = !rationItems[index].bought; saveToCloud(); updateRationUI(); }
-function deleteRation(index) { rationItems.splice(index, 1); saveToCloud(); updateRationUI(); }
+
+function renderHistory() {
+    const list = document.getElementById('history-list');
+    const totalDisp = document.getElementById('total-expense');
+    const filter = document.getElementById('month-filter').value; // YYYY-MM
+    
+    let filtered = allExpenses;
+    if (filter) {
+        filtered = allExpenses.filter(e => e.date.startsWith(filter));
+    }
+
+    let total = 0;
+    list.innerHTML = filtered.map(e => {
+        total += e.amount;
+        return `
+            <li>
+                <div class="list-left">
+                    <strong>${e.desc}</strong>
+                    <div style="display:flex; gap:5px;">
+                        <span class="member-badge">${e.member}</span>
+                        <span class="category-badge cat-${e.category}">${e.category}</span>
+                    </div>
+                </div>
+                <div class="list-right">
+                    <span>₹${e.amount}</span>
+                    <button class="action-btn delete" onclick="deleteExpense('${e.id}')">🗑️</button>
+                </div>
+            </li>
+        `;
+    }).join('');
+
+    totalDisp.innerText = `₹${total}`;
+}
+
+async function deleteExpense(id) {
+    const user = auth.currentUser;
+    const result = await Swal.fire({ title: 'Delete?', text: "Yeh kharcha mita dein?", icon: 'warning', showCancelButton: true });
+    
+    if (result.isConfirmed) {
+        await db.collection('users').doc(user.email).collection('expenses').doc(id).delete();
+    }
+}
 
 // ==========================================
-// 🏦 7. EMI AND VYAJ LOGIC
+// 📈 3. CHARTS & TOOLS
+// ==========================================
+function updateCharts() {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const catData = {};
+    allExpenses.forEach(e => catData[e.category] = (catData[e.category] || 0) + e.amount);
+
+    if (window.myChart) window.myChart.destroy();
+    window.myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(catData),
+            datasets: [{ data: Object.values(catData), backgroundColor: ['#2563eb', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'] }]
+        },
+        options: { plugins: { legend: { position: 'bottom' } } }
+    });
+}
+
+// SECTION SWITCHING
+function openSection(id, title) {
+    document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active-section'));
+    document.getElementById(`section-${id}`).classList.add('active-section');
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+    event.currentTarget.classList.add('active-nav');
+    
+    document.getElementById('app-title').innerText = title;
+    document.getElementById('sound-click').play();
+}
+
+// ==========================================
+// 🎙️ 4. VOICE TYPING (Jadu!)
+// ==========================================
+function startVoice() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'hi-IN';
+    document.getElementById('mic-btn').innerText = "🛑";
+
+    recognition.onresult = (event) => {
+        document.getElementById('description').value = event.results[0][0].transcript;
+        document.getElementById('mic-btn').innerText = "🎤";
+    };
+    recognition.start();
+}
+
+// ==========================================
+// 🧮 5. EMI & VYAJ CALCULATORS
 // ==========================================
 function calculateEMI() {
-    const p = parseFloat(document.getElementById('emi-principal').value); const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100; const n = parseFloat(document.getElementById('emi-time').value);
-    if (isNaN(p) || isNaN(r) || isNaN(n) || p <= 0 || n <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
-    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); const totalAmount = emi * n;
-    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; document.getElementById('emi-interest').innerText = `₹${Math.round(totalAmount - p)}`; document.getElementById('emi-total').innerText = `₹${Math.round(totalAmount)}`;
+    const p = parseFloat(document.getElementById('emi-principal').value);
+    const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100;
+    const n = parseFloat(document.getElementById('emi-time').value);
+
+    if (!p || !r || !n) return;
+    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    
+    document.getElementById('emi-result').style.display = 'block';
+    document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`;
 }
 
 function calculateVyaj() {
-    const p = parseFloat(document.getElementById('vyaj-principal').value); const rate = parseFloat(document.getElementById('vyaj-rate').value); const time = parseFloat(document.getElementById('vyaj-time').value);
-    if (isNaN(p) || isNaN(rate) || isNaN(time) || p <= 0 || time <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
-    const interest = (p * rate * time) / 100;
-    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
-}
+    const p = parseFloat(document.getElementById('vyaj-principal').value);
+    const r = parseFloat(document.getElementById('vyaj-rate').value);
+    const t = parseFloat(document.getElementById('vyaj-time').value);
 
-// ==========================================
-// ☁️ 8. BACKUP & RESTORE SYSTEM (SMART VERSION)
-// ==========================================
-function backupData() {
-    const dataObj = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit };
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "FamilyApp_Backup_" + todayDateString + ".json");
-    document.body.appendChild(downloadAnchorNode);
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-    Swal.fire('Success!', 'Data ka backup tumhare phone mein download ho gaya hai!', 'success');
-}
-
-function restoreData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            
-            // 🛠️ SMART PARSING: Agar data string form mein hai, toh use theek karo
-            let tempExp = importedData.expenses || importedData.familyExpenses || [];
-            if (typeof tempExp === 'string') tempExp = JSON.parse(tempExp);
-            familyExpenses = tempExp;
-
-            let tempDudh = importedData.dudh || importedData.dudhRecords || [];
-            if (typeof tempDudh === 'string') tempDudh = JSON.parse(tempDudh);
-            dudhRecords = tempDudh === null ? [] : tempDudh; // Null check
-            
-            let tempRation = importedData.ration || importedData.rationItems || [];
-            if (typeof tempRation === 'string') tempRation = JSON.parse(tempRation);
-            rationItems = tempRation === null ? [] : tempRation; // Null check
-
-            budgetLimit = importedData.budget || importedData.budgetLimit || 20000;
-            
-            // UI Update karo
-            updateHisabUI(); 
-            updateDudhUI(); 
-            updateRationUI();
-            
-            // Agar cloud login hai, toh seedha wahan save kar do
-            if (currentUser) {
-                await saveToCloud();
-                Swal.fire('Restored & Synced!', 'Data wapas aagaya aur Cloud par bhi save ho gaya! ☁️', 'success');
-            } else {
-                Swal.fire('Restored!', 'Data wapas aagaya hai! (Lekin login nahi ho isliye Cloud par save nahi hua)', 'info');
-            }
-        } catch (err) {
-            Swal.fire('Error', 'Sahi backup file select karein.', 'error');
-            console.error("Restore failed:", err);
-        }
-    };
-    reader.readAsText(file);
-}
-
-// ==========================================
-// 📤 9. SHARE PDF REPORT SYSTEM 
-// ==========================================
-async function shareReport() {
-    if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
+    if (!p || !r || !t) return;
+    const interest = (p * r * t) / 100;
     
-    const filterMonth = document.getElementById('month-filter').value;
-    const dataToExport = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
-    
-    if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai share karne ke liye.', 'info');
+    document.getElementById('vyaj-result').style.display = 'block';
+    document.getElementById('vyaj-only').innerText = `₹${interest}`;
+}
 
-    // 1. PDF Design Banayein (Download wale ki tarah)
-    const { jsPDF } = window.jspdf; 
+// ==========================================
+// 📄 6. EXPORT & SHARE
+// ==========================================
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
+    doc.text("Family Expense Report", 14, 15);
     
-    const tableColumn = ["Date", "Name", "Category", "Details", "Amount"]; 
-    const tableRows = []; let totalAmount = 0;
-    
-    [...dataToExport].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(exp => { 
-        const p = exp.date.split('-'); 
-        tableRows.push([`${p[2]}/${p[1]}`, exp.member || '-', exp.category || 'Other', exp.description, `Rs ${exp.amount}`]); 
-        totalAmount += exp.amount; 
-    });
-    
-    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
-    
-    // 2. PDF ko File Format mein badlein (Taki share ho sake)
-    const pdfBlob = doc.output('blob');
-    const fileName = `Hisaab_${filterMonth}.pdf`;
-    const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
-
-    // 3. Mobile ka Share Menu Kholein
-    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-        try {
-            await navigator.share({
-                title: `Ghar Ka Hisaab - ${filterMonth}`,
-                text: `Is mahine ka total kharcha: ₹${totalAmount}. Puri details PDF mein check karein!`,
-                files: [pdfFile]
-            });
-        } catch (error) {
-            console.log('Share cancel hua:', error);
-        }
-    } else {
-        // Agar browser PDF share support na kare, toh download kar dega
-        Swal.fire('Browser Support Nahi Hai', 'Aapka browser direct PDF share karna support nahi karta. File download ho gayi hai, usey WhatsApp par bhej dein.', 'info');
-        doc.save(fileName); 
-    }
+    const rows = allExpenses.map(e => [e.date, e.desc, e.member, e.category, e.amount]);
+    doc.autoTable({ head: [['Date', 'Item', 'User', 'Cat', 'Amount']], body: rows, startY: 20 });
+    doc.save("Family_Report.pdf");
 }
 
+function shareReport() {
+    const total = document.getElementById('total-expense').innerText;
+    const text = `Family Hisaab Report 💰\nIs mahine ka kharcha: ${total}\nApp link: family-super-app.web.app`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+// Dark Mode Toggle
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    document.getElementById('theme-toggle').innerText = isDark ? '☀️' : '🌙';
+}
