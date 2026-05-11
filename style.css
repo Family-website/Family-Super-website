@@ -13,251 +13,97 @@
     --sticky-yellow: #fef08a;  
 }
 
-* { 
-    margin: 0; padding: 0; 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 /* 🖋️ 2. THE CLEAN NOTEBOOK DESK */
-body { 
-    background-color: #f8fafc; 
-    display: flex; justify-content: center; 
-    min-height: 100vh; margin: 0; 
-    font-family: 'Nunito', sans-serif;
-    color: var(--text-main);
-}
-
-.app-container { 
-    width: 100%; max-width: 480px; min-height: 100vh; 
-    background-color: var(--paper-bg); 
-    background-image: repeating-linear-gradient(transparent, transparent 33px, var(--line-color) 34px);
-    position: relative; 
-    box-shadow: 0 0 40px rgba(0,0,0,0.03);
-    border-left: 1.5px solid var(--margin-color); 
-    padding-left: 8px; 
-}
-
-.app-container::before {
-    content: ''; position: absolute; top: 0; left: 4px; 
-    width: 1px; height: 100%; 
-    background: var(--margin-color); z-index: 0;
-}
+body { background-color: #f8fafc; display: flex; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Nunito', sans-serif; color: var(--text-main); }
+.app-container { width: 100%; max-width: 480px; min-height: 100vh; background-color: var(--paper-bg); background-image: repeating-linear-gradient(transparent, transparent 33px, var(--line-color) 34px); position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.03); border-left: 1.5px solid var(--margin-color); padding-left: 8px; }
+.app-container::before { content: ''; position: absolute; top: 0; left: 4px; width: 1px; height: 100%; background: var(--margin-color); z-index: 0; }
 
 /* 🎩 3. ELEGANT HEADER */
-.header { 
-    background: linear-gradient(to bottom, var(--paper-bg) 85%, transparent);
-    padding: 30px 15px 10px 15px; 
-    text-align: center;
-    position: sticky; top: 0; z-index: 100;
-}
-.header h2 { 
-    font-family: 'Caveat', cursive; 
-    font-weight: 700; font-size: 44px; 
-    color: var(--ink-blue); 
-    transform: rotate(-1.5deg); 
-}
-#smart-greeting { 
-    font-size: 14px; font-weight: 800; color: #94a3b8; 
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; 
-}
-
-/* 📦 4. SPRING ANIMATIONS */
+.header { background: linear-gradient(to bottom, var(--paper-bg) 85%, transparent); position: sticky; top: 0; z-index: 100; }
 .content-area { padding: 5px 20px 130px 20px; position: relative; z-index: 1; } 
 .app-section { display: none; }
 .active-section { display: block; animation: smoothFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes smoothFadeIn { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
 
-@keyframes smoothFadeIn { 
-    0% { opacity: 0; transform: translateY(15px); } 
-    100% { opacity: 1; transform: translateY(0); } 
-}
-
-/* ✨ 5. FLAT & CLEAN STICKY NOTE */
-.balance-card { 
-    text-align: center; padding: 30px 20px; 
-    margin: 15px auto 30px auto; 
-    background: var(--sticky-yellow);
-    border-radius: 8px 8px 25px 8px; 
-    position: relative; 
-    box-shadow: 0 10px 25px -5px rgba(250, 204, 21, 0.4);
-    transform: rotate(-1deg);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.balance-card::before {
-    content: ''; position: absolute; top: -10px; left: 50%; 
-    transform: translateX(-50%) rotate(-2deg);
-    width: 60px; height: 20px; 
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 2px;
-}
-
+/* ✨ 4. FLAT & CLEAN STICKY NOTE */
+.balance-card { text-align: center; padding: 30px 20px; margin: 15px auto 30px auto; background: var(--sticky-yellow); border-radius: 8px 8px 25px 8px; position: relative; box-shadow: 0 10px 25px -5px rgba(250, 204, 21, 0.4); transform: rotate(-1deg); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.balance-card::before { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 60px; height: 20px; background: rgba(255, 255, 255, 0.7); border-radius: 2px; }
 .balance-card:active { transform: scale(0.97); }
 .balance-card p { font-size: 16px; font-weight: 700; color: #52525b; margin-bottom: 5px; }
-.balance-card h1 { 
-    font-family: 'Caveat', cursive; font-size: 60px; 
-    font-weight: 700; color: var(--ink-red); 
-    line-height: 1;
-}
-
+.balance-card h1 { font-family: 'Caveat', cursive; font-size: 60px; font-weight: 700; color: var(--ink-red); line-height: 1; }
 #section-hisab .balance-card { background: #fef08a; } 
 #section-emi .balance-card { background: #fbcfe8; box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.4); } 
 #section-vyaj .balance-card { background: #bbf7d0; box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.4); } 
 #section-dudh .balance-card { background: #bfdbfe; box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.4); } 
 #section-ration .balance-card { background: #e9d5ff; box-shadow: 0 10px 25px -5px rgba(192, 132, 252, 0.4); } 
 
-/* 📋 6. CRISP PENCIL BOX (Forms) */
-.form-section, .budget-section, .checklist-section { 
-    background: rgba(255, 255, 255, 0.9); 
-    padding: 22px 18px; border-radius: 16px; 
-    border: 1.5px dashed #cbd5e1; 
-    margin-bottom: 25px; 
-}
-.form-section label, .budget-section span { 
-    display: block; margin-bottom: 4px; color: #64748b; 
-    font-weight: 700; font-size: 13px; margin-top: 12px; 
-}
-
-/* ⌨️ 7. MINIMALIST INPUTS */
-.form-section input, .form-section select, #month-filter, .lock-card input { 
-    width: 100%; padding: 8px 0px; margin-bottom: 5px; 
-    border: none; border-bottom: 1.5px solid #cbd5e1; 
-    border-radius: 0; background: transparent; 
-    font-family: 'Caveat', cursive; 
-    font-size: 26px; font-weight: 600; color: var(--ink-blue); 
-    transition: all 0.2s ease;
-}
-.form-section input:focus, .form-section select:focus, #month-filter:focus { 
-    border-bottom: 2px solid var(--ink-blue); outline: none; 
-}
-
-/* 🔘 8. BOUNCY MARKER BUTTONS */
-.expense-btn { 
-    width: 100%; padding: 15px; color: #fff; border: none; 
-    border-radius: 12px; cursor: pointer; margin-top: 20px; 
-    background: var(--ink-blue); 
-    font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-}
+/* 📋 5. FORMS */
+.form-section, .budget-section, .checklist-section { background: rgba(255, 255, 255, 0.9); padding: 22px 18px; border-radius: 16px; border: 1.5px dashed #cbd5e1; margin-bottom: 25px; }
+.form-section label, .budget-section span { display: block; margin-bottom: 4px; color: #64748b; font-weight: 700; font-size: 13px; margin-top: 12px; }
+.form-section input, .form-section select, #month-filter, .lock-card input { width: 100%; padding: 8px 0px; margin-bottom: 5px; border: none; border-bottom: 1.5px solid #cbd5e1; border-radius: 0; background: transparent; font-family: 'Caveat', cursive; font-size: 26px; font-weight: 600; color: var(--ink-blue); transition: all 0.2s ease; }
+.form-section input:focus, .form-section select:focus, #month-filter:focus { border-bottom: 2px solid var(--ink-blue); outline: none; }
+.expense-btn { width: 100%; padding: 15px; color: #fff; border: none; border-radius: 12px; cursor: pointer; margin-top: 20px; background: var(--ink-blue); font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .expense-btn:active { transform: scale(0.95); }
 #section-hisab .expense-btn { background: #10b981; } 
 
-/* 📜 9. CLEAN HISTORY LIST */
+/* 📜 6. HISTORY LIST */
 .history-section h3 { margin-top: 10px; margin-bottom: 15px; color: #1e293b; font-family: 'Caveat', cursive; font-size: 32px; font-weight: 700; }
 ul { list-style-type: none; }
-li { 
-    padding: 12px 5px; margin-bottom: 5px; 
-    display: flex; justify-content: space-between; align-items: center; 
-    border-bottom: 1px dashed #e2e8f0;
-}
+li { padding: 12px 5px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #e2e8f0; }
 .list-left { display: flex; flex-direction: column; gap: 2px; }
 .list-left strong { font-family: 'Caveat', cursive; font-size: 24px; color: var(--text-main); } 
 .list-right { display: flex; align-items: center; gap: 10px; }
 .list-right span { font-family: 'Caveat', cursive; font-size: 26px !important; color: var(--ink-red) !important; font-weight: 700; } 
-
-.member-badge, .category-badge { 
-    background: #f1f5f9; color: #475569; 
-    padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; 
-    margin-right: 5px; text-transform: uppercase;
-}
-
-/* ✏️ SIMPLE ACTION BUTTONS */
-.action-btn { 
-    background: transparent; border: none; cursor: pointer; font-size: 18px; transition: 0.2s; 
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-}
+.member-badge, .category-badge { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; margin-right: 5px; text-transform: uppercase; }
+.action-btn { background: transparent; border: none; cursor: pointer; font-size: 18px; transition: 0.2s; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
 .action-btn.delete { color: #ef4444; opacity: 0.7; }
 .action-btn.delete:hover { opacity: 1; transform: scale(1.1); }
 .action-btn.edit { color: #3b82f6; opacity: 0.7; }
 .action-btn.edit:hover { opacity: 1; transform: scale(1.1); }
 
-/* 🛸 10. FLOATING PILL NAVIGATION */
-.bottom-nav { 
-    position: fixed !important; 
-    bottom: max(15px, env(safe-area-inset-bottom)) !important; 
-    left: 50% !important; transform: translateX(-50%) !important; 
-    width: calc(100% - 40px) !important; max-width: 400px !important; 
-    display: flex !important; justify-content: space-around !important; 
-    background: rgba(255, 255, 255, 0.95) !important; 
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid #e2e8f0 !important; border-radius: 30px !important; 
-    padding: 8px 5px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; 
-    z-index: 999999 !important; 
-}
-.nav-btn { 
-    flex: 1 !important; background: transparent !important; border: none !important; 
-    color: #94a3b8 !important; font-size: 14px !important; font-weight: 700 !important; 
-    cursor: pointer !important; padding: 6px !important; 
-    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important;
-    font-family: 'Caveat', cursive !important; transition: all 0.2s ease !important;
-}
+/* 🛸 7. BOTTOM NAV */
+.bottom-nav { position: fixed !important; bottom: max(15px, env(safe-area-inset-bottom)) !important; left: 50% !important; transform: translateX(-50%) !important; width: calc(100% - 40px) !important; max-width: 400px !important; display: flex !important; justify-content: space-around !important; background: rgba(255, 255, 255, 0.95) !important; backdrop-filter: blur(10px) !important; border: 1px solid #e2e8f0 !important; border-radius: 30px !important; padding: 8px 5px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; z-index: 999999 !important; }
+.nav-btn { flex: 1 !important; background: transparent !important; border: none !important; color: #94a3b8 !important; font-size: 14px !important; font-weight: 700 !important; cursor: pointer !important; padding: 6px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important; font-family: 'Caveat', cursive !important; transition: all 0.2s ease !important; }
 .nav-btn i { font-size: 22px !important; transition: 0.2s; opacity: 0.5;}
 .active-nav { color: var(--ink-blue) !important; font-weight: 700 !important; }
 .active-nav i { color: var(--ink-blue) !important; opacity: 1; transform: translateY(-2px); }
 
-/* 🔒 11. LOCK SCREEN */
-.lock-overlay { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(248, 250, 252, 0.95); z-index: 100000; 
-    display: flex; align-items: center; justify-content: center; 
-}
-.lock-card { 
-    background: var(--paper-bg); padding: 40px 30px; 
-    border-radius: 20px; border: 1px solid #e2e8f0; text-align: center; 
-    width: 90%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); 
-}
-.lock-icon { font-size: 55px; margin-bottom: 5px; }
-#lock-title { font-family: 'Caveat', cursive; font-weight: 700; font-size: 42px; color: var(--ink-blue); }
-#lock-desc { font-size: 14px; font-weight: 700; color: #94a3b8; margin-bottom: 25px !important;}
+/* 🔒 8. LOCK SCREEN */
+.lock-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(248, 250, 252, 0.95); z-index: 100000; display: flex; align-items: center; justify-content: center; }
+.lock-card { background: var(--paper-bg); padding: 40px 30px; border-radius: 20px; border: 1px solid #e2e8f0; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
 
-/* 🌙 12. DARK MODE */
+/* 🌙 9. DARK MODE */
 body.dark-mode { background-color: #0f172a; }
-body.dark-mode .app-container { 
-    background-color: #1e293b; 
-    background-image: repeating-linear-gradient(transparent, transparent 33px, rgba(255,255,255,0.03) 34px);
-    border-left: 1.5px solid #7f1d1d; 
-}
+body.dark-mode .app-container { background-color: #1e293b; background-image: repeating-linear-gradient(transparent, transparent 33px, rgba(255,255,255,0.03) 34px); border-left: 1.5px solid #7f1d1d; }
 body.dark-mode .app-container::before { background: #7f1d1d; }
-body.dark-mode .header h2, body.dark-mode .form-section input, 
-body.dark-mode .form-section select, body.dark-mode #month-filter,
-body.dark-mode .list-left strong, body.dark-mode #lock-title { color: #f1f5f9; border-bottom-color: #475569; }
+body.dark-mode .header h2, body.dark-mode .form-section input, body.dark-mode .form-section select, body.dark-mode #month-filter, body.dark-mode .list-left strong, body.dark-mode #lock-title { color: #f1f5f9; border-bottom-color: #475569; }
 body.dark-mode .form-section input:focus, body.dark-mode .form-section select:focus { border-bottom-color: #f1f5f9; }
 body.dark-mode .list-right span, body.dark-mode .balance-card h1 { color: #f87171 !important; }
-body.dark-mode .form-section, body.dark-mode .budget-section, body.dark-mode .checklist-section { 
-    background: rgba(15, 23, 42, 0.5); border-color: #334155; 
-}
+body.dark-mode .form-section, body.dark-mode .budget-section, body.dark-mode .checklist-section { background: rgba(15, 23, 42, 0.5); border-color: #334155; }
 body.dark-mode label, body.dark-mode h3, body.dark-mode p { color: #cbd5e1 !important; }
 body.dark-mode li { border-bottom-color: #334155; }
 body.dark-mode .bottom-nav { background: rgba(30, 41, 59, 0.95) !important; border-color: #334155 !important; }
 body.dark-mode .lock-overlay { background: rgba(15, 23, 42, 0.98); }
 body.dark-mode .lock-card { background-color: #1e293b; border-color: #334155; }
 body.dark-mode .member-badge, body.dark-mode .category-badge { background: #334155; color: #cbd5e1; }
+body.dark-mode .profile-stats { background: #1e293b !important; border-color: #475569 !important; }
+body.dark-mode #profile-name { color: #f1f5f9 !important; }
 
-/* ==========================================
-   ✨ 13. PREMIUM SKETCH ICON ANIMATIONS
-================================================ */
-@keyframes premiumBreath {
-    0%, 100% { 
-        transform: translateY(0) scale(1); 
-        opacity: 0.9; 
-    }
-    50% { 
-        transform: translateY(-6px) scale(1.05); 
-        opacity: 1; 
-        text-shadow: 0 15px 25px rgba(37, 99, 235, 0.25); 
-    }
-}
+/* ✨ 10. ANIMATIONS */
+@keyframes premiumBreath { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; } 50% { transform: translateY(-6px) scale(1.05); opacity: 1; text-shadow: 0 15px 25px rgba(37, 99, 235, 0.25); } }
+.anim-premium-icon { font-size: 85px !important; color: var(--ink-blue); animation: premiumBreath 3.5s ease-in-out infinite; margin-bottom: 10px; display: inline-block; }
+body.dark-mode .anim-premium-icon { color: #f1f5f9; text-shadow: 0 15px 25px rgba(255, 255, 255, 0.15); }
 
-.anim-premium-icon {
-    font-size: 85px !important;
-    color: var(--ink-blue);
-    animation: premiumBreath 3.5s ease-in-out infinite;
-    margin-bottom: 10px;
-    display: inline-block;
-}
+/* 👤 11. PROFILE MODAL STYLING */
+.profile-card-anim { animation: slideUpProfile 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes slideUpProfile { 0% { transform: translateY(100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-body.dark-mode .anim-premium-icon {
-    color: #f1f5f9;
-    text-shadow: 0 15px 25px rgba(255, 255, 255, 0.15);
-}
-
+/* 🎨 12. THEME STORE COLORS */
+.theme-btn { padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; transition: 0.2s; font-size: 14px; }
+.theme-btn:active { transform: scale(0.95); }
+body[data-theme="nature"] { --ink-blue: #16a34a; --ink-red: #ea580c; --sticky-yellow: #dcfce7; --margin-color: #bbf7d0; }
+body[data-theme="sunset"] { --ink-blue: #9333ea; --ink-red: #e11d48; --sticky-yellow: #f3e8ff; --margin-color: #fce7f3; }
+body[data-theme="coffee"] { --ink-blue: #b45309; --ink-red: #be123c; --sticky-yellow: #fef3c7; --margin-color: #ffedd5; }
+body[data-theme="rose"]   { --ink-blue: #e11d48; --ink-red: #be185d; --sticky-yellow: #ffe4e6; --margin-color: #fbcfe8; }
