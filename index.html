@@ -23,10 +23,10 @@
 </head>
 <body>
 
-    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s ease;">
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.4s ease;">
         <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_p8bfn5to.json" background="transparent" speed="1.5" style="width: 180px; height: 180px;" loop autoplay></lottie-player>
         <h1 style="font-family: 'Caveat', cursive; font-size: 42px; color: #2563eb; margin-top: -20px; font-weight: 700;">Family Super App</h1>
-        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">Loading Securely... ☁️</p>
+        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">Loading... ☁️</p>
     </div>
 
     <div id="login-screen" class="lock-overlay" style="display: none;">
@@ -249,12 +249,11 @@
         window.addEventListener('load', function() {
             setTimeout(function() {
                 const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                    document.getElementById(localStorage.getItem('familyAppUser') ? 'main-app' : 'login-screen').style.display = 'block';
-                }, 500);
-            }, 2000); 
+                if(splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 400); // Completely remove from screen
+                }
+            }, 1800); 
         });
     </script>
     
