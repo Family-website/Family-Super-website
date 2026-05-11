@@ -1,262 +1,230 @@
-/* ==========================================
-   🔤 1. CRISP TYPOGRAPHY & VARIABLES
-================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+/* 🔤 HANDWRITING TYPOGRAPHY: 'Kalam' (For Ink Text) & 'Nunito' (For Labels) */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Nunito:wght@500;700&display=swap');
 
-:root {
-    --ink-blue: #2563eb;       
-    --ink-red: #dc2626;        
-    --text-main: #334155;      
-    --paper-bg: #ffffff;       
-    --line-color: #f1f5f9;     
-    --margin-color: #ffe4e6;   
-    --sticky-yellow: #fef08a;  
-}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-* { 
-    margin: 0; padding: 0; 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; 
-}
-
-/* 🖋️ 2. THE CLEAN NOTEBOOK DESK */
+/* 🖋️ THE WOODEN DESK BACKGROUND */
 body { 
-    background-color: #f8fafc; 
-    display: flex; justify-content: center; 
-    min-height: 100vh; margin: 0; 
-    font-family: 'Nunito', sans-serif;
-    color: var(--text-main);
+    background-color: #cbd5e1; /* Gray wooden desk color */
+    display: flex; justify-content: center; min-height: 100vh; margin: 0; 
 }
 
+/* 📓 THE NOTEBOOK PAGE (APP CONTAINER) */
 .app-container { 
-    width: 100%; max-width: 480px; min-height: 100vh; 
-    background-color: var(--paper-bg); 
-    background-image: repeating-linear-gradient(transparent, transparent 33px, var(--line-color) 34px);
+    width: 100%; max-width: 450px; min-height: 100vh; 
+    background-color: #fdfbf7; /* Off-white old paper color */
+    /* Blue Ruled Lines of a Notebook */
+    background-image: repeating-linear-gradient(transparent, transparent 29px, #bae6fd 30px);
     position: relative; 
-    box-shadow: 0 0 40px rgba(0,0,0,0.03);
-    border-left: 1.5px solid var(--margin-color); 
-    padding-left: 8px; 
+    box-shadow: 15px 15px 30px rgba(0,0,0,0.1), -5px 0 15px rgba(0,0,0,0.05);
+    /* The Red Margin Line */
+    border-left: 2px solid #fda4af; 
+    padding-left: 5px; /* Shift content slightly from red line */
 }
-
+/* Double Red Line Effect */
 .app-container::before {
-    content: ''; position: absolute; top: 0; left: 4px; 
-    width: 1px; height: 100%; 
-    background: var(--margin-color); z-index: 0;
+    content: ''; position: absolute; top: 0; left: 4px; width: 1px; height: 100%; background: #fda4af; z-index: 0;
 }
 
-/* 🎩 3. ELEGANT HEADER */
+/* 🎩 HANDWRITTEN HEADER */
 .header { 
-    background: linear-gradient(to bottom, var(--paper-bg) 85%, transparent);
-    padding: 30px 15px 10px 15px; 
+    background: transparent; 
+    padding: 40px 15px 10px 15px; 
     text-align: center;
-    position: sticky; top: 0; z-index: 100;
+    position: relative; z-index: 1;
 }
 .header h2 { 
-    font-family: 'Caveat', cursive; 
-    font-weight: 700; font-size: 44px; 
-    color: var(--ink-blue); 
-    transform: rotate(-1.5deg); 
+    font-family: 'Kalam', cursive; /* Handwritten font */
+    font-weight: 700; font-size: 38px; 
+    color: #1e3a8a; /* Deep Ink Blue */
+    transform: rotate(-2deg); /* Slightly tilted handwriting */
 }
-#smart-greeting { 
-    font-size: 14px; font-weight: 800; color: #94a3b8; 
-    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; 
-}
+#smart-greeting { font-family: 'Nunito', sans-serif; color: #64748b !important; font-size: 14px !important; font-weight: 700 !important; margin-bottom: 5px !important; }
 
-/* 📦 4. SPRING ANIMATIONS */
-.content-area { padding: 5px 20px 130px 20px; position: relative; z-index: 1; } 
+/* 📦 SECTIONS SPACING */
+.content-area { padding: 10px 15px 140px 15px; position: relative; z-index: 1; } 
 .app-section { display: none; }
-.active-section { display: block; animation: smoothFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-@keyframes smoothFadeIn { 
-    0% { opacity: 0; transform: translateY(15px); } 
-    100% { opacity: 1; transform: translateY(0); } 
+.active-section { display: block; animation: paperDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+@keyframes paperDrop { 
+    from { opacity: 0; transform: translateY(-20px) rotate(2deg); } 
+    to { opacity: 1; transform: translateY(0) rotate(0deg); } 
 }
 
-/* ✨ 5. FLAT & CLEAN STICKY NOTE */
+/* ✨ STICKY NOTES (THE CARDS) */
 .balance-card { 
-    text-align: center; padding: 30px 20px; 
-    margin: 15px auto 30px auto; 
-    background: var(--sticky-yellow);
-    border-radius: 8px 8px 25px 8px; 
+    text-align: center; padding: 35px 20px; 
+    margin-bottom: 35px; 
+    color: #111;
     position: relative; 
-    box-shadow: 0 10px 25px -5px rgba(250, 204, 21, 0.4);
-    transform: rotate(-1deg);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 3px 6px 15px rgba(0,0,0,0.1);
+    border-radius: 2px 15px 15px 2px; /* Folded corner look */
+    transition: transform 0.3s ease;
 }
-
+/* The Tape holding the sticky note */
 .balance-card::before {
-    content: ''; position: absolute; top: -10px; left: 50%; 
-    transform: translateX(-50%) rotate(-2deg);
-    width: 60px; height: 20px; 
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 2px;
+    content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg);
+    width: 60px; height: 25px; background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 2px;
 }
+.balance-card:active { transform: scale(0.98) rotate(0deg) !important; }
 
-.balance-card:active { transform: scale(0.97); }
-.balance-card p { font-size: 16px; font-weight: 700; color: #52525b; margin-bottom: 5px; }
+.balance-card p { font-family: 'Nunito', sans-serif; font-size: 15px; margin-bottom: 0px; font-weight: 700; color: #444; }
 .balance-card h1 { 
-    font-family: 'Caveat', cursive; font-size: 60px; 
-    font-weight: 700; color: var(--ink-red); 
-    line-height: 1;
+    font-family: 'Kalam', cursive; 
+    font-size: 55px; font-weight: 700; 
+    color: #b91c1c; /* Red pen for total amount */
 }
 
-#section-hisab .balance-card { background: #fef08a; } 
-#section-emi .balance-card { background: #fbcfe8; box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.4); } 
-#section-vyaj .balance-card { background: #bbf7d0; box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.4); } 
-#section-dudh .balance-card { background: #bfdbfe; box-shadow: 0 10px 25px -5px rgba(96, 165, 250, 0.4); } 
-#section-ration .balance-card { background: #e9d5ff; box-shadow: 0 10px 25px -5px rgba(192, 132, 252, 0.4); } 
+/* Post-it Note Colors */
+#section-hisab .balance-card { background: #fef08a; transform: rotate(-2deg); border: 1px solid #fde047; } /* Yellow */
+#section-emi .balance-card { background: #fbcfe8; transform: rotate(1deg); border: 1px solid #f9a8d4; } /* Pink */
+#section-vyaj .balance-card { background: #bbf7d0; transform: rotate(-1deg); border: 1px solid #86efac; } /* Green */
+#section-dudh .balance-card { background: #bfdbfe; transform: rotate(2deg); border: 1px solid #93c5fd; } /* Blue */
+#section-ration .balance-card { background: #e9d5ff; transform: rotate(-1.5deg); border: 1px solid #d8b4fe; } /* Purple */
 
-/* 📋 6. CRISP PENCIL BOX (Forms) */
+/* 📋 DOODLE FORMS */
 .form-section, .budget-section, .checklist-section { 
-    background: rgba(255, 255, 255, 0.9); 
-    padding: 22px 18px; border-radius: 16px; 
-    border: 1.5px dashed #cbd5e1; 
+    background: rgba(255, 255, 255, 0.7); 
+    padding: 20px 15px; border-radius: 10px; 
+    border: 2px dashed #cbd5e1; /* Dashed pencil box */
     margin-bottom: 25px; 
 }
-.form-section label, .budget-section span { 
-    display: block; margin-bottom: 4px; color: #64748b; 
-    font-weight: 700; font-size: 13px; margin-top: 12px; 
-}
+.form-section label { display: block; margin-bottom: 5px; color: #475569; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; margin-top: 15px; }
 
-/* ⌨️ 7. MINIMALIST INPUTS */
-.form-section input, .form-section select, #month-filter, .lock-card input { 
-    width: 100%; padding: 8px 0px; margin-bottom: 5px; 
-    border: none; border-bottom: 1.5px solid #cbd5e1; 
-    border-radius: 0; background: transparent; 
-    font-family: 'Caveat', cursive; 
-    font-size: 26px; font-weight: 600; color: var(--ink-blue); 
+/* ⌨️ HANDWRITTEN INPUT LINES */
+.form-section input, .form-section select, #month-filter { 
+    width: 100%; padding: 10px 5px; margin-bottom: 5px; 
+    border: none; border-bottom: 2px solid #94a3b8; /* Just a bottom line to write on */
+    border-radius: 0; 
+    background: transparent; 
+    font-family: 'Kalam', cursive; /* User's handwriting */
+    font-size: 22px; font-weight: 700; color: #1e3a8a; /* Blue ink */
     transition: all 0.2s ease;
 }
 .form-section input:focus, .form-section select:focus, #month-filter:focus { 
-    border-bottom: 2px solid var(--ink-blue); outline: none; 
+    border-bottom: 3px solid #ef4444; /* Red line when focused */
+    outline: none; background: rgba(255,255,255,0.5);
 }
 
-/* 🔘 8. BOUNCY MARKER BUTTONS */
+/* 🔘 MARKER PEN BUTTONS */
 .expense-btn { 
     width: 100%; padding: 15px; color: #fff; border: none; 
-    border-radius: 12px; cursor: pointer; margin-top: 20px; 
-    background: var(--ink-blue); 
-    font-family: 'Caveat', cursive; font-size: 24px; font-weight: 700;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    border-radius: 8px; cursor: pointer; margin-top: 20px; 
+    background: #ef4444; /* Red Marker */
+    font-family: 'Kalam', cursive; font-size: 24px; font-weight: 700;
+    box-shadow: 4px 4px 0 #991b1b; /* 3D Sketch Shadow */
+    transform: rotate(-1deg);
+    transition: all 0.1s ease; 
 }
-.expense-btn:active { transform: scale(0.95); }
-#section-hisab .expense-btn { background: #10b981; } 
+.expense-btn:active { transform: translate(4px, 4px) rotate(0deg); box-shadow: 0 0 0 transparent; }
+#section-hisab .expense-btn { background: #10b981; box-shadow: 4px 4px 0 #065f46; } /* Green Marker */
 
-/* 📜 9. CLEAN HISTORY LIST */
-.history-section h3 { margin-top: 10px; margin-bottom: 15px; color: #1e293b; font-family: 'Caveat', cursive; font-size: 32px; font-weight: 700; }
+/* ⏳ SCRIBBLE SKELETON LOADER */
+.skeleton-box { height: 80px; border-radius: 10px; background: repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 10px, #f8fafc 10px, #f8fafc 20px); opacity: 0.6; margin-bottom: 12px; border: 2px dashed #cbd5e1; }
+
+/* 📜 NOTEBOOK LIST (The Ledger Lines) */
+.history-section h3 { margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-family: 'Kalam', cursive; font-size: 28px; font-weight: 700; text-decoration: underline; text-decoration-color: #ef4444;}
 ul { list-style-type: none; }
 li { 
-    padding: 12px 5px; margin-bottom: 5px; 
+    background: transparent; padding: 10px 5px; margin-bottom: 5px; 
+    /* No borders, just aligns with the notebook lines! */
     display: flex; justify-content: space-between; align-items: center; 
-    border-bottom: 1px dashed #e2e8f0;
+    transition: 0.2s; position: relative;
 }
+/* Yellow Highlighter effect on hover */
+li:hover::before {
+    content: ''; position: absolute; top: 5px; left: -5px; width: 105%; height: 80%;
+    background: #fef08a; opacity: 0.4; z-index: -1; border-radius: 4px;
+}
+
 .list-left { display: flex; flex-direction: column; gap: 2px; }
-.list-left strong { font-family: 'Caveat', cursive; font-size: 24px; color: var(--text-main); } 
+.list-left strong { font-family: 'Kalam', cursive; font-size: 20px; color: #1e3a8a; } /* Blue Ink Text */
 .list-right { display: flex; align-items: center; gap: 10px; }
-.list-right span { font-family: 'Caveat', cursive; font-size: 26px !important; color: var(--ink-red) !important; font-weight: 700; } 
+.list-right span { font-family: 'Kalam', cursive; font-size: 24px !important; color: #b91c1c !important; font-weight: 700; } /* Red Ink Amount */
 
-.member-badge, .category-badge { 
-    background: #f1f5f9; color: #475569; 
-    padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; 
-    margin-right: 5px; text-transform: uppercase;
-}
+.member-badge { font-family: 'Nunito', sans-serif; background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-right: 5px; border: 1px solid #cbd5e1;}
 
-/* ✏️ SIMPLE ACTION BUTTONS */
-.action-btn { 
-    background: transparent; border: none; cursor: pointer; font-size: 18px; transition: 0.2s; 
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-}
-.action-btn.delete { color: #ef4444; opacity: 0.7; }
-.action-btn.delete:hover { opacity: 1; transform: scale(1.1); }
-.action-btn.edit { color: #3b82f6; opacity: 0.7; }
-.action-btn.edit:hover { opacity: 1; transform: scale(1.1); }
+/* ✏️ RED/BLUE PEN ACTION BUTTONS */
+.action-btn { background: transparent; border: 2px solid #cbd5e1; border-radius: 50%; padding: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;}
+.action-btn.delete { color: #ef4444; border-color: #ef4444;}
+.action-btn.delete:hover { background: #ef4444; color: white; transform: scale(1.1) rotate(10deg); }
+.action-btn.edit { color: #3b82f6; border-color: #3b82f6;}
+.action-btn.edit:hover { background: #3b82f6; color: white; transform: scale(1.1) rotate(-10deg); }
 
-/* 🛸 10. FLOATING PILL NAVIGATION */
+/* ------------------------------------------- */
+/* 🛸 FLOATING CARDBOARD NAV BAR (BUG-FREE) */
+/* ------------------------------------------- */
 .bottom-nav { 
     position: fixed !important; 
-    bottom: max(15px, env(safe-area-inset-bottom)) !important; 
+    bottom: max(20px, env(safe-area-inset-bottom)) !important; 
     left: 50% !important; transform: translateX(-50%) !important; 
-    width: calc(100% - 40px) !important; max-width: 400px !important; 
+    width: calc(100% - 30px) !important; max-width: 420px !important; 
     display: flex !important; justify-content: space-around !important; 
-    background: rgba(255, 255, 255, 0.95) !important; 
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid #e2e8f0 !important; border-radius: 30px !important; 
-    padding: 8px 5px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important; 
+    background: #fdfbf7 !important; /* Paper color */
+    border: 3px solid #475569 !important; /* Thick sketch line */
+    border-radius: 15px !important; 
+    padding: 10px 10px !important; 
+    box-shadow: 6px 6px 0px rgba(71, 85, 105, 0.4) !important; /* Hard cardboard shadow */
     z-index: 999999 !important; 
 }
 .nav-btn { 
     flex: 1 !important; background: transparent !important; border: none !important; 
-    color: #94a3b8 !important; font-size: 14px !important; font-weight: 700 !important; 
-    cursor: pointer !important; padding: 6px !important; 
-    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 2px !important;
-    font-family: 'Caveat', cursive !important; transition: all 0.2s ease !important;
+    color: #94a3b8 !important; font-size: 13px !important; font-weight: 700 !important; 
+    cursor: pointer !important; padding: 5px !important; 
+    display: flex !important; flex-direction: column !important; align-items: center !important; gap: 4px !important;
+    font-family: 'Kalam', cursive !important;
+    transition: 0.2s ease !important;
 }
-.nav-btn i { font-size: 22px !important; transition: 0.2s; opacity: 0.5;}
-.active-nav { color: var(--ink-blue) !important; font-weight: 700 !important; }
-.active-nav i { color: var(--ink-blue) !important; opacity: 1; transform: translateY(-2px); }
+.nav-btn i { font-size: 22px !important; transition: 0.2s; filter: grayscale(100%); opacity: 0.6;}
 
-/* 🔒 11. LOCK SCREEN */
-.lock-overlay { 
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(248, 250, 252, 0.95); z-index: 100000; 
-    display: flex; align-items: center; justify-content: center; 
+/* Ink Pen Active State */
+.active-nav { color: #1e3a8a !important; font-weight: 700 !important; }
+.active-nav i { color: #1e3a8a !important; transform: scale(1.2) translateY(-4px); filter: grayscale(0%); opacity: 1;}
+.active-nav::after {
+    content: '〰️' !important; position: absolute !important; 
+    bottom: -10px !important; left: 50% !important; transform: translateX(-50%) !important;
+    font-size: 12px !important; color: #1e3a8a !important;
 }
-.lock-card { 
-    background: var(--paper-bg); padding: 40px 30px; 
-    border-radius: 20px; border: 1px solid #e2e8f0; text-align: center; 
-    width: 90%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); 
-}
-.lock-icon { font-size: 55px; margin-bottom: 5px; }
-#lock-title { font-family: 'Caveat', cursive; font-weight: 700; font-size: 42px; color: var(--ink-blue); }
-#lock-desc { font-size: 14px; font-weight: 700; color: #94a3b8; margin-bottom: 25px !important;}
+/* ------------------------------------------- */
 
-/* 🌙 12. DARK MODE */
+/* 🏷️ STAMP BADGES */
+.category-badge { font-family: 'Nunito', sans-serif; font-size: 10px; padding: 2px 6px; border-radius: 4px; color: #fff; font-weight: 700; text-transform: uppercase; border: 2px solid transparent;}
+.cat-Ration { background: #f59e0b; } .cat-Medical { background: #ef4444; } .cat-Petrol { background: #3b82f6; } .cat-Shopping { background: #d946ef; } .cat-Bills { background: #10b981; } .cat-Other { background: #64748b; }
+.receipt-thumb { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 2px dashed #94a3b8; cursor: pointer; padding: 2px; transition: 0.2s; transform: rotate(3deg);}
+.receipt-thumb:hover { transform: scale(3) rotate(0deg); z-index: 100; background: #fff; border: 2px solid #111; box-shadow: 5px 5px 15px rgba(0,0,0,0.3);}
+
+/* 🔒 SECRET DIARY LOCK SCREEN */
+.lock-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #cbd5e1; z-index: 100000; display: flex; align-items: center; justify-content: center; }
+.lock-card { background: #fdfbf7; padding: 40px 30px; border-radius: 10px; border: 2px solid #475569; text-align: center; color: #111; width: 90%; max-width: 350px; box-shadow: 10px 10px 0px rgba(71,85,105,0.3); background-image: repeating-linear-gradient(transparent, transparent 29px, #bae6fd 30px); }
+.lock-icon { font-size: 55px; margin-bottom: 15px; color: #ef4444; }
+#lock-title { font-family: 'Kalam', cursive; font-weight: 700; font-size: 32px; color: #1e3a8a; }
+#lock-desc { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; color: #64748b; }
+.pin-container { display: flex; justify-content: center; gap: 10px; margin: 30px 0; }
+.pin-box { width: 50px; height: 60px; font-size: 34px; text-align: center; border-radius: 8px; border: 2px dashed #94a3b8; background: transparent; color: #1e3a8a; font-family: 'Kalam', cursive; font-weight: 700; outline: none; transition: 0.2s; }
+.pin-box:focus { border: 2px solid #ef4444; background: rgba(255,255,255,0.8); transform: translateY(-3px); }
+.shake-error { animation: shakeLock 0.3s; border: 2px solid #ef4444 !important; background: #fee2e2 !important; color: #ef4444 !important;}
+
+/* 🌙 DARK MODE (The Black Slate / Blackboard) */
 body.dark-mode { background-color: #0f172a; }
 body.dark-mode .app-container { 
-    background-color: #1e293b; 
-    background-image: repeating-linear-gradient(transparent, transparent 33px, rgba(255,255,255,0.03) 34px);
-    border-left: 1.5px solid #7f1d1d; 
+    background-color: #1e293b; /* Chalkboard color */
+    background-image: repeating-linear-gradient(transparent, transparent 29px, #334155 30px);
+    border-left: 2px solid #991b1b;
+    box-shadow: none;
 }
-body.dark-mode .app-container::before { background: #7f1d1d; }
-body.dark-mode .header h2, body.dark-mode .form-section input, 
-body.dark-mode .form-section select, body.dark-mode #month-filter,
-body.dark-mode .list-left strong, body.dark-mode #lock-title { color: #f1f5f9; border-bottom-color: #475569; }
-body.dark-mode .form-section input:focus, body.dark-mode .form-section select:focus { border-bottom-color: #f1f5f9; }
-body.dark-mode .list-right span, body.dark-mode .balance-card h1 { color: #f87171 !important; }
-body.dark-mode .form-section, body.dark-mode .budget-section, body.dark-mode .checklist-section { 
-    background: rgba(15, 23, 42, 0.5); border-color: #334155; 
-}
+body.dark-mode .app-container::before { background: #991b1b; }
+body.dark-mode .header h2, body.dark-mode .form-section input, body.dark-mode .list-left strong, body.dark-mode #lock-title { color: #f8fafc; /* White Chalk */ }
+body.dark-mode .list-right span, body.dark-mode .balance-card h1 { color: #fca5a5 !important; /* Pink/Red Chalk */ }
+body.dark-mode .form-section, body.dark-mode .budget-section, body.dark-mode .checklist-section { background: transparent; border-color: #475569; }
 body.dark-mode label, body.dark-mode h3, body.dark-mode p { color: #cbd5e1 !important; }
-body.dark-mode li { border-bottom-color: #334155; }
-body.dark-mode .bottom-nav { background: rgba(30, 41, 59, 0.95) !important; border-color: #334155 !important; }
-body.dark-mode .lock-overlay { background: rgba(15, 23, 42, 0.98); }
-body.dark-mode .lock-card { background-color: #1e293b; border-color: #334155; }
-body.dark-mode .member-badge, body.dark-mode .category-badge { background: #334155; color: #cbd5e1; }
 
-/* ==========================================
-   ✨ 13. PREMIUM SKETCH ICON ANIMATIONS
-================================================ */
-@keyframes premiumBreath {
-    0%, 100% { 
-        transform: translateY(0) scale(1); 
-        opacity: 0.9; 
-    }
-    50% { 
-        transform: translateY(-6px) scale(1.05); 
-        opacity: 1; 
-        text-shadow: 0 15px 25px rgba(37, 99, 235, 0.25); 
-    }
-}
+/* Chalkboard Navigation */
+body.dark-mode .bottom-nav { background: #1e293b !important; border-color: #94a3b8 !important; box-shadow: 6px 6px 0px rgba(0,0,0,0.8) !important; }
+body.dark-mode .nav-btn { color: #64748b !important; }
+body.dark-mode .active-nav { color: #f8fafc !important; }
+body.dark-mode .active-nav i { color: #f8fafc !important; }
+body.dark-mode .active-nav::after { color: #f8fafc !important; }
 
-.anim-premium-icon {
-    font-size: 85px !important;
-    color: var(--ink-blue);
-    animation: premiumBreath 3.5s ease-in-out infinite;
-    margin-bottom: 10px;
-    display: inline-block;
-}
-
-body.dark-mode .anim-premium-icon {
-    color: #f1f5f9;
-    text-shadow: 0 15px 25px rgba(255, 255, 255, 0.15);
-}
+body.dark-mode .lock-overlay { background: #0f172a; }
+body.dark-mode .lock-card { background-color: #1e293b; border-color: #94a3b8; background-image: repeating-linear-gradient(transparent, transparent 29px, #334155 30px); box-shadow: 10px 10px 0px rgba(0,0,0,0.8); }
+body.dark-mode .pin-box { color: #fff; border-color: #64748b;}
