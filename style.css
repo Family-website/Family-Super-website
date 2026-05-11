@@ -46,7 +46,7 @@ body {
 
 /* 📦 3. LAYOUT (Padded for Nav Bar) */
 .content-area { 
-    padding: 10px 20px 140px 20px; /* 140px niche jagah chodi hai taki button na chupe */
+    padding: 10px 20px 140px 20px;
     position: relative; z-index: 1; 
 } 
 .app-section { display: none; }
@@ -149,14 +149,14 @@ li {
     width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
 }
 
-/* 🛸 9. FLOATING PILL NAVIGATION (Opera Safe - No Blur, Solid Color) */
+/* 🛸 9. FLOATING PILL NAVIGATION (Opera Safe - Solid Color) */
 .bottom-nav { 
     position: fixed !important; 
     bottom: 15px !important; 
     left: 50% !important; transform: translateX(-50%) !important; 
     width: 90% !important; max-width: 400px !important; 
     display: flex !important; justify-content: space-around !important; 
-    background-color: #ffffff !important; /* Opera ke liye solid white */
+    background-color: #ffffff !important;
     border: 2px solid #e2e8f0 !important; border-radius: 30px !important; 
     padding: 8px 5px !important; box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important; 
     z-index: 999999 !important; 
@@ -209,13 +209,15 @@ body.dark-mode .lock-card { background-color: #1e293b; border-color: #334155; }
 body.dark-mode .member-badge, body.dark-mode .category-badge { background: #334155; color: #cbd5e1; border-color: #475569; }
 
 /* ==========================================
-   ✨ 12. GENTLE FLOAT ANIMATION
+   ✨ 12. PREMIUM SKETCH ICON ANIMATIONS
 ================================================ */
-@keyframes floatGentle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+@keyframes premiumBreath {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.9; }
+    50% { transform: translateY(-6px) scale(1.05); opacity: 1; text-shadow: 0 15px 25px rgba(37, 99, 235, 0.25); }
 }
-.anim-float {
-    display: inline-block;
-    animation: floatGentle 3s ease-in-out infinite;
+.anim-premium-icon {
+    font-size: 85px !important; color: var(--ink-blue);
+    animation: premiumBreath 3.5s ease-in-out infinite;
+    margin-bottom: 10px; display: inline-block;
 }
+body.dark-mode .anim-premium-icon { color: #f1f5f9; text-shadow: 0 15px 25px rgba(255, 255, 255, 0.15); }
