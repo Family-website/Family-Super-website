@@ -1,6 +1,5 @@
-const CACHE_NAME = 'gharmanager-v1';
+const CACHE_NAME = 'gharmanager-v2';
 
-// 1. Install hone par files ko phone mein save karna
 self.addEventListener('install', (e) => {
     e.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -9,15 +8,17 @@ self.addEventListener('install', (e) => {
                 './index.html',
                 './style.css',
                 './script.js',
-                './icon.png',
                 './manifest.json'
-            ]);
+            ]).catch(err => console.log('Cache error', err));
         })
     );
-    console.log('[Service Worker] GharManager Install & Cached 😎');
+    self.skipWaiting();
 });
 
-// 2. Internet na hone par save ki hui files dikhana
+self.addEventListener('activate', (e) => {
+    e.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('fetch', (e) => {
     e.respondWith(
         caches.match(e.request).then((response) => {
