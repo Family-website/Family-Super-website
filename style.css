@@ -1,24 +1,55 @@
 /* ==========================================
-   ✨ NEW PREMIUM FONT SYSTEM
+   ✨ BALANCED PREMIUM FONT SYSTEM (MEDIUM)
 ========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Quicksand:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Quicksand:wght@500;600&display=swap');
 
-/* 1. App ka saara normal text aur numbers (Quicksand) */
-* {
+/* 1. Poore app ka base size set kiya */
+html {
+    font-size: 14px; /* Default size ko thoda kam kiya */
+}
+
+body {
     font-family: 'Quicksand', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    color: #1e293b;
 }
 
-/* 2. Main Headings aur Titles (Poppins) */
-h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
+/* 2. Headings ko medium aur balanced kiya */
+h1, h2, #app-title, #lock-title {
     font-family: 'Poppins', sans-serif !important;
-    letter-spacing: 0.5px !important;
-}
-
-/* 3. Buttons ko thoda bold look dene ke liye */
-.expense-btn, .nav-btn span {
-    font-family: 'Poppins', sans-serif !important;
+    font-size: 1.6rem !important; /* Pehle se kaafi chota aur elegant */
     font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
 }
+
+h3, .balance-card p {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+}
+
+/* 3. Main Balance Amount (Ye thoda highlight hona chahiye) */
+#total-expense, #dudh-total-bill {
+    font-size: 2.2rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px !important;
+}
+
+/* 4. List Items, Buttons aur Inputs ko compact kiya */
+li strong, label, .nav-btn span {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+}
+
+input, select, .expense-btn {
+    font-size: 0.95rem !important;
+    padding: 10px 15px !important; /* Input box ko chota kiya */
+}
+
+.history-section h3 {
+    font-size: 1.2rem !important;
+}
+
 
 
 /* ==========================================
