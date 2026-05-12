@@ -1,23 +1,40 @@
 /* ==========================================
-   ✨ NEW PREMIUM FONT SYSTEM
+   📏 FONT SIZE FIX (Medium & Balanced)
+   Sirf size chota kiya hai, Font wahi rahega!
 ========================================== */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Quicksand:wght@500;700&display=swap');
 
-/* 1. App ka saara normal text aur numbers (Quicksand) */
-* {
-    font-family: 'Quicksand', sans-serif !important;
+/* 1. Input Box aur Dropdown (Aditya, Ration etc.) ko medium kiya */
+input, select, textarea {
+    font-size: 16px !important; /* Pehle bahut bada tha, ab ekdam standard ho gaya */
+    padding: 10px 14px !important;
 }
 
-/* 2. Main Headings aur Titles (Poppins) */
-h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
-    font-family: 'Poppins', sans-serif !important;
-    letter-spacing: 0.5px !important;
+/* 2. Labels (Kaun kharcha kar raha hai?) ko chota aur clean kiya */
+label {
+    font-size: 13px !important;
+    margin-bottom: 4px !important;
 }
 
-/* 3. Buttons ko thoda bold look dene ke liye */
-.expense-btn, .nav-btn span {
-    font-family: 'Poppins', sans-serif !important;
-    font-weight: 500 !important;
+/* 3. Main Title (GharManager) ka size adjust kiya */
+#app-title {
+    font-size: 28px !important; 
+}
+
+/* 4. Total Amount (₹4676) thoda bada rahega par limit me */
+#total-expense, #dudh-total-bill {
+    font-size: 38px !important;
+}
+.balance-card p {
+    font-size: 14px !important;
+}
+
+/* 5. Buttons aur baki chote text */
+.expense-btn {
+    font-size: 16px !important;
+    padding: 12px !important;
+}
+.nav-btn span {
+    font-size: 11px !important; /* Bottom menu text chota kiya */
 }
 
 
