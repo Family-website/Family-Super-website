@@ -111,15 +111,22 @@ function logout() {
 // ==========================================
 // ☁️ 3. CLOUD DATA SYNC (LIVE LISTENER)
 // ==========================================
-let familyExpenses = []; let dudhRecords = []; let rationItems = []; let budgetLimit = 20000;
+let familyExpenses = []; let dudhRecords = []; let rationItems = []; let budgetLimit = 20000; 
+let customDisplayName = ""; // Naya variable naam ke liye
 
 function loadCloudData(uid) {
     try {
         const docRef = db.collection('familyData').doc(uid);
         docRef.onSnapshot((doc) => {
             if (doc.exists) {
-                const data = doc.data(); familyExpenses = data.expenses || []; dudhRecords = data.dudh || []; rationItems = data.ration || []; budgetLimit = data.budget || 20000;
+                const data = doc.data(); 
+                familyExpenses = data.expenses || []; 
+                dudhRecords = data.dudh || []; 
+                rationItems = data.ration || []; 
+                budgetLimit = data.budget || 20000;
+                customDisplayName = data.displayName || ""; // Cloud se naam uthaya
                 updateHisabUI(); updateDudhUI(); updateRationUI();
+                updateGreetingName(); // Naam screen par update kiya
             } else { updateHisabUI(); }
         }, (error) => { console.error("Cloud fetch failed:", error); });
     } catch (error) { console.error("Cloud fetch exception:", error); }
@@ -127,7 +134,15 @@ function loadCloudData(uid) {
 
 async function saveToCloud() {
     if(!currentUser) return;
-    try { await db.collection('familyData').doc(currentUser.uid).set({ expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit }, { merge: true }); } catch (error) { console.error("Cloud save failed:", error); }
+    try { 
+        await db.collection('familyData').doc(currentUser.uid).set({ 
+            expenses: familyExpenses, 
+            dudh: dudhRecords, 
+            ration: rationItems, 
+            budget: budgetLimit,
+            displayName: customDisplayName // Cloud par naam save kiya
+        }, { merge: true }); 
+    } catch (error) { console.error("Cloud save failed:", error); }
 }
 
 async function syncOldLocalData() {
@@ -139,6 +154,46 @@ async function syncOldLocalData() {
         if (localRation && localRation.length > 0 && rationItems.length === 0) { rationItems = localRation; dataChanged = true; }
         if (dataChanged) { await saveToCloud(); localStorage.removeItem('familyExpenses'); localStorage.removeItem('dudhRecords'); localStorage.removeItem('rationItems'); }
     } catch(e) { console.log("Error syncing local data:", e); }
+}
+
+// ==========================================
+// 👤 3.5. CUSTOM NAME LOGIC
+// ==========================================
+function updateProfileName() {
+    const currentName = customDisplayName || (currentUser ? currentUser.email.split("@")[0] : "User");
+    Swal.fire({
+        title: 'Apna Naam Likhein',
+        input: 'text',
+        inputValue: currentName,
+        showCancelButton: true,
+        confirmButtonText: 'Save Karein',
+        confirmButtonColor: '#2563eb',
+        inputValidator: (value) => {
+            if (!value.trim()) return 'Naam khali nahi chhod sakte!';
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            customDisplayName = result.value.trim();
+            saveToCloud(); 
+            updateGreetingName(); 
+            Swal.fire('Saved!', 'Aapka naam update ho gaya hai.', 'success');
+        }
+    });
+}
+
+function updateGreetingName() {
+    if (!currentUser) return;
+    const finalName = customDisplayName || currentUser.email.split("@")[0];
+    const NameFormatted = finalName.charAt(0).toUpperCase() + finalName.slice(1);
+    const firstLetter = finalName.charAt(0).toUpperCase();
+    
+    const profileNameEl = document.getElementById('profile-name');
+    const avatarEl = document.getElementById('user-avatar');
+    const largeAvatarEl = document.getElementById('profile-avatar-large');
+
+    if(profileNameEl) profileNameEl.innerText = NameFormatted;
+    if(avatarEl) avatarEl.innerText = firstLetter;
+    if(largeAvatarEl) largeAvatarEl.innerText = firstLetter;
 }
 
 // ==========================================
@@ -401,9 +456,8 @@ function startVoice() {
 function openProfile() {
     const modal = document.getElementById('profile-modal'); if(!modal) return;
     if (currentUser) {
-        let userName = currentUser.email.split("@")[0]; const NameFormatted = userName.charAt(0).toUpperCase() + userName.slice(1);
-        document.getElementById('profile-name').innerText = NameFormatted; document.getElementById('profile-email').innerText = currentUser.email;
-        const firstLetter = userName.charAt(0).toUpperCase(); document.getElementById('profile-avatar-large').innerText = firstLetter;
+        document.getElementById('profile-email').innerText = currentUser.email;
+        updateGreetingName(); // Naya naam set karne ke liye
     }
     let totalExpAllTime = familyExpenses.reduce((sum, item) => sum + item.amount, 0); document.getElementById('profile-total-expense').innerText = `₹${totalExpAllTime}`;
     let totalDudhAllTime = dudhRecords.reduce((sum, item) => sum + ((item.morning + item.evening) * item.rate), 0); document.getElementById('profile-total-dudh').innerText = `₹${Math.round(totalDudhAllTime)}`;
