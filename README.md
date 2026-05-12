@@ -20,7 +20,7 @@ GharManager is a comprehensive, offline-ready Progressive Web App (PWA) designed
 * **Libraries:** Chart.js, jsPDF, SweetAlert2, Canvas-Confetti
 
 ## 🚀 Live Demo
-You can experience the app here: [Insert Your GitHub Pages Link Here]
+You can experience the app here: [https://family-website.github.io/GharManager/]
 
 ## 👨‍💻 Developer
 Developed with logic, clean code, and a focus on solving real-world household management problems.
