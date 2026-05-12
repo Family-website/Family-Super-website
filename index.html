@@ -236,7 +236,12 @@
             
             <div id="profile-avatar-large" class="anim-premium-icon" style="width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--ink-blue), #8b5cf6); color: white; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: 800; margin: 0 auto 10px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">A</div>
             
-            <h2 id="profile-name" style="font-family: 'Nunito', sans-serif; font-size: 24px; color: var(--ink-blue); font-weight: 800; margin-bottom: 2px;">User</h2>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2px;">
+    <h2 id="profile-name" style="font-family: 'Nunito', sans-serif; font-size: 24px; color: var(--ink-blue); font-weight: 800; margin-bottom: 0;">User</h2>
+    <button onclick="updateProfileName()" style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 0; line-height: 1;">✏️</button>
+</div>
+
+
             <p id="profile-email" style="color: #94a3b8; font-size: 13px; margin-bottom: 20px; font-weight: 700;">email@domain.com</p>
             
             <div class="profile-stats" style="background: var(--line-color); border: 1.5px dashed #cbd5e1; border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: left;">
