@@ -178,3 +178,4 @@ function restoreData(event) {
         } catch(err) { Swal.fire('Error', 'File read nahi ho paayi.', 'error'); }
     }; reader.readAsText(file);
 }
+
