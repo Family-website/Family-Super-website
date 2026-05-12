@@ -1,13 +1,27 @@
-// Install Event
+const CACHE_NAME = 'gharmanager-v1';
+
+// 1. Install hone par files ko phone mein save karna
 self.addEventListener('install', (e) => {
-    console.log('[Service Worker] GharManager App Install');
+    e.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll([
+                './',
+                './index.html',
+                './style.css',
+                './script.js',
+                './icon.png',
+                './manifest.json'
+            ]);
+        })
+    );
+    console.log('[Service Worker] GharManager Install & Cached 😎');
 });
 
-// Fetch Event - Ye lagana sabse zaroori hai tabhi "Install" ka popup aayega!
+// 2. Internet na hone par save ki hui files dikhana
 self.addEventListener('fetch', (e) => {
     e.respondWith(
-        fetch(e.request).catch(() => {
-            console.log("Network request failed");
+        caches.match(e.request).then((response) => {
+            return response || fetch(e.request);
         })
     );
 });
