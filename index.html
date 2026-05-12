@@ -315,5 +315,25 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script src="./script.js?v=22"></script>
+    <script>
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            const login = document.getElementById('login-screen');
+            const main = document.getElementById('main-app');
+            
+            // Agar 3.5 second baad bhi loading screen nahi hati, toh zabardasti hata do
+            if (splash && splash.style.display !== 'none') {
+                splash.style.display = 'none';
+                
+                // Agar user login nahi hai, toh login screen dikhao
+                if (main && main.style.display !== 'block') {
+                    if (login) login.style.display = 'flex';
+                }
+            }
+        }, 3500);
+    </script>
+</body>
+</html>
+
 </body>
 </html>
