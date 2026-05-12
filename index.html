@@ -8,12 +8,13 @@
     <link rel="icon" href="./icon.png">
     <link rel="apple-touch-icon" href="./icon.png">
     <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
     <meta name="description" content="GharManager - Ghar ka hisaab, EMI calculator, Dudh aur Ration ka record.">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="./style.css?v=20">
+    <link rel="stylesheet" href="./style.css?v=22">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -34,17 +35,12 @@
             <p id="lock-desc" style="margin-bottom: 20px; color: #94a3b8; font-size: 13px; font-weight: 700;">Humesha ke liye jud jaayein!</p>
             
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
-                <input type="email" id="email-input" placeholder="Email ID (e.g., aditya@ghar.com)" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 14px; outline: none; width: 100%;">
+                <input type="email" id="email-input" placeholder="Email ID" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 14px; outline: none; width: 100%;">
                 <input type="password" id="password-input" placeholder="Password (Min 6 letters)" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 14px; outline: none; width: 100%;">
             </div>
 
-            <button type="button" onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; display: block; width: 100%; margin-bottom: 10px; font-size: 18px; padding: 12px; border-radius: 12px; border: none; cursor: pointer; font-weight: bold; font-family: 'Caveat', cursive;">
-                🚀 Login Karein
-            </button>
-            <button type="button" onclick="registerWithEmail()" style="background: transparent; border: 2px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; font-family: 'Nunito', sans-serif;">
-                Naya Account Banayein
-            </button>
-            
+            <button type="button" onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; margin-bottom: 10px; font-size: 18px; padding: 12px; font-family: 'Caveat', cursive;">🚀 Login Karein</button>
+            <button type="button" onclick="registerWithEmail()" style="background: transparent; border: 2px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold; font-family: 'Nunito', sans-serif;">Naya Account Banayein</button>
             <p id="login-status" style="margin-top: 15px; font-size: 13px; color: #2563eb; display: none; font-weight: bold;">Connecting... ⏳</p>
         </div>
     </div>
@@ -53,7 +49,7 @@
         
         <div class="header" style="padding: 20px 20px 10px 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px; text-align: left;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <div id="user-avatar" onclick="openProfile()" style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, var(--ink-blue), #8b5cf6); color: white; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Nunito', sans-serif; transition: 0.3s;">A</div>
                     <div>
                         <p id="smart-greeting" style="font-size: 13px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Hello! ✨</p>
@@ -281,12 +277,12 @@
                     <button type="button" onclick="openThemeStore()" class="expense-btn" style="background: var(--line-color); color: var(--ink-blue); border: 2px solid var(--ink-blue); font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s;">🎨 Themes</button>
                     <button type="button" onclick="toggleSound()" id="sound-toggle-btn" class="expense-btn" style="background: var(--line-color); color: #10b981; border: 2px solid #10b981; font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s;">🔊 Sound: ON</button>
                 </div>
+                
+                <button type="button" id="install-app-btn" onclick="installApp()" class="expense-btn" style="display: block; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 16px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(16,185,129,0.3); margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s; margin-bottom: 2px;">
+                    📲 Install App To Home Screen
+                </button>
+
                 <button type="button" onclick="logout(); closeProfile();" class="expense-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 2px solid #ef4444; font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800;">🚪 Logout</button>
-
-<button type="button" id="install-app-btn" onclick="installApp()" class="expense-btn" style="display: block; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 16px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(16,185,129,0.3); margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s; margin-bottom: 10px;">
-    📲 Install App To Home Screen
-</button>
-
             </div>
         </div>
     </div>
@@ -318,6 +314,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./script.js?v=20"></script>
+    <script src="./script.js?v=22"></script>
 </body>
 </html>
