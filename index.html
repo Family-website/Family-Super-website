@@ -16,24 +16,17 @@
     
     <link rel="stylesheet" href="./style.css?v=poppins_medium">
 
-
-    
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    <link rel="icon" href="./icon.png">
-    <link rel="apple-touch-icon" href="./icon.png">
+    
     <link rel="shortcut icon" href="./icon.png" type="image/png">
-
-<meta name="google-site-verification" content="fZwGT-hq1h80Z_KN46QPPakhStF9F_geRxz_t1Wg2K0" />
-
+    <meta name="google-site-verification" content="fZwGT-hq1h80Z_KN46QPPakhStF9F_geRxz_t1Wg2K0" />
 </head>
 <body>
 
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-       
- <img src="./icon.png" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 15px; border: 3px solid white;">
-
+        <img src="./icon.png" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 15px; border: 3px solid white;">
         <h1 style="font-family: 'Caveat', cursive; font-size: 44px; color: #2563eb; font-weight: 700;">GharManager</h1>
         <p style="font-family: 'Nunito', sans-serif; font-size: 14px; color: #94a3b8; font-weight: 700;">Loading Your Cloud... ⏳</p>
     </div>
@@ -129,7 +122,6 @@
                 <div class="history-section">
                     <h3>Hisaab & Reports</h3>
                     <input type="month" id="month-filter" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: bold;" onchange="renderHistoryWithSkeleton()">
-                    
                     <ul id="history-list"></ul>
                 </div>
             </div>
@@ -219,19 +211,19 @@
         </div>
 
         <div class="bottom-nav">
-            <button type="button" class="nav-btn active-nav" onclick="openSection('HISAB', 'GharManager 🏠')">
+            <button type="button" class="nav-btn active-nav" onclick="openSection('hisab', 'GharManager 🏠')">
                 <i style="font-style: normal; font-size: 20px;">💰</i><span>HISAB</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('EMI', 'EMI Calculator 🏦')">
+            <button type="button" class="nav-btn" onclick="openSection('emi', 'EMI Calculator 🏦')">
                 <i style="font-style: normal; font-size: 20px;">🏦</i><span>EMI</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('VYAJ', 'Gaon Ka Vyaj ₹')">
+            <button type="button" class="nav-btn" onclick="openSection('vyaj', 'Gaon Ka Vyaj ₹')">
                 <i style="font-style: normal; font-size: 20px;">₹</i><span>VYAJ</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('MILK', 'MILK 🥛')">
+            <button type="button" class="nav-btn" onclick="openSection('dudh', 'MILK 🥛')">
                 <i style="font-style: normal; font-size: 20px;">🥛</i><span>MILK</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('RATION', 'RATION 🛒')">
+            <button type="button" class="nav-btn" onclick="openSection('ration', 'RATION 🛒')">
                 <i style="font-style: normal; font-size: 20px;">🛒</i><span>RATION</span>
             </button>
         </div>
@@ -273,7 +265,7 @@
             <div style="background: var(--line-color); border-radius: 20px; padding: 15px; margin-bottom: 20px;">
                 <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">💾 Data & Reports</p>
                 
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <button type="button" onclick="exportToPDF()" style="flex:1; padding:10px; background:white; color:#e74c3c; border:1.5px solid #e74c3c; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📄 Save PDF</button>
                     <button type="button" onclick="shareReport()" style="flex:1; padding:10px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📤 Share</button>
                 </div>
