@@ -297,7 +297,7 @@ async function toggleRation(index) {
         const autoExpense = { member: "Aditya", category: "Ration", description: `🛒 ${item.name} (Ration)`, amount: item.amount, date: todayDateString, receipt: "" };
         familyExpenses.push(autoExpense);
         playSound('success');
-        Swal.fire({ title: 'Hisaab mein juda!', text: `${item.name} ka ₹${item.amount} 'Ghar ka Hisaab' mein add ho gaya hai. ✅`, icon: 'success', timer: 2000, showConfirmButton: false });
+        Swal.fire({ title: 'Hisaab mein juda!', text: `${item.name} ka ₹${item.amount} 'GharManager' mein add ho gaya hai. ✅`, icon: 'success', timer: 2000, showConfirmButton: false });
     }
     await saveToCloud(); updateRationUI(); updateHisabUI();
 }
@@ -353,7 +353,7 @@ function calculateVyaj() {
 // ==========================================
 // 💾 9. BACKUP & RESTORE SYSTEM
 // ==========================================
-function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "Family_Cloud_Backup.json"); dlAnchorElem.click(); }
+function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "GharManager_Cloud_Backup.json"); dlAnchorElem.click(); }
 function restoreData(event) {
     const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
     reader.onload = async function(e) {
@@ -377,11 +377,11 @@ async function shareReport() {
     const dataToExport = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
     if(dataToExport.length === 0) return Swal.fire('Khali hai!', 'Koi record nahi hai.', 'info');
     const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`Ghar Ka Hisaab (${filterMonth})`, 14, 15);
+    doc.setFillColor(30, 60, 114); doc.rect(0, 0, 210, 22, 'F'); doc.setTextColor(255, 255, 255); doc.setFontSize(18); doc.text(`GharManager (${filterMonth})`, 14, 15);
     const tableColumn = ["Date", "Name", "Category", "Details", "Amount"]; const tableRows = []; let totalAmount = 0;
     [...dataToExport].sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(exp => { const p = exp.date.split('-'); tableRows.push([`${p[2]}/${p[1]}`, exp.member || '-', exp.category || 'Other', exp.description, `Rs ${exp.amount}`]); totalAmount += exp.amount; });
     doc.autoTable({ head: [tableColumn], body: tableRows, startY: 30, theme: 'grid', headStyles: { fillColor: [46, 204, 113] }, foot: [["", "", "", "Total :", `Rs ${totalAmount}`]], footStyles: { fillColor: [231, 76, 60] } });
-    const pdfBlob = doc.output('blob'); const fileName = `Hisaab_${filterMonth}.pdf`; const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+    const pdfBlob = doc.output('blob'); const fileName = `GharManager_${filterMonth}.pdf`; const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
     if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) { try { await navigator.share({ title: `Hisaab - ${filterMonth}`, text: `Total kharcha: ₹${totalAmount}.`, files: [pdfFile] }); } catch (error) { console.log('Share cancel hua:', error); } } else { doc.save(fileName); }
 }
 function exportToPDF() { shareReport(); }
@@ -431,46 +431,42 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 📲 14. PWA / INSTALL APP SYSTEM (SERVICE WORKER)
-// ==========================================
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registered! 😎', reg))
-            .catch(err => console.log('Service Worker Error ❌', err));
-    });
-}
-
-// ==========================================
-// 📲 15. CUSTOM PWA INSTALL BUTTON (BRAHMASTRA)
+// 📲 14. PWA INSTALL & SERVICE WORKER LOGIC
 // ==========================================
 let deferredPrompt;
 
-// Chrome jab install karne ke liye ready hoga, tab ye button dikhayega
+// Browser ka auto prompt intercept karo
 window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault(); // Chrome ka apna popup roko
-    deferredPrompt = e; // Event ko save karo
-    
-    // Apna custom button dikhao
-    const installBtn = document.getElementById('install-app-btn');
-    if(installBtn) installBtn.style.display = 'block'; 
+    e.preventDefault();
+    deferredPrompt = e;
 });
 
-// Jab user apne "Install App" button par click karega
+// Apne "Install App" button ka click function
 function installApp() {
-    if (!deferredPrompt) return;
-    
-    // Install wala popup dikhao
-    deferredPrompt.prompt();
-    
-    // Check karo user ne Install kiya ya Cancel
-    deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-            Swal.fire('Mubarak Ho! 🎉', 'GharManager aapke phone mein install ho raha hai!', 'success');
-            document.getElementById('install-app-btn').style.display = 'none'; // Button hata do
-        } else {
-            console.log('User ne cancel kar diya');
-        }
-        deferredPrompt = null;
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                Swal.fire('Mubarak Ho! 🎉', 'GharManager phone mein install ho gaya hai!', 'success');
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        // Agar Chrome ne auto-prompt nahi diya, toh user ko step-by-step guide karo
+        Swal.fire({
+            title: 'Install Kaise Karein?',
+            text: 'Bhai, upar Right corner mein 3-dots (⋮) par click karo aur wahan se "Add to Home screen" daba do!',
+            icon: 'info',
+            confirmButtonText: 'Theek hai 👍'
+        });
+    }
+}
+
+// Service Worker Register
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('✅ Service Worker Active!'))
+            .catch(err => console.error('❌ Service Worker Error', err));
     });
 }
