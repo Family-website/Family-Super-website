@@ -440,3 +440,37 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('Service Worker Error ❌', err));
     });
 }
+
+// ==========================================
+// 📲 15. CUSTOM PWA INSTALL BUTTON (BRAHMASTRA)
+// ==========================================
+let deferredPrompt;
+
+// Chrome jab install karne ke liye ready hoga, tab ye button dikhayega
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); // Chrome ka apna popup roko
+    deferredPrompt = e; // Event ko save karo
+    
+    // Apna custom button dikhao
+    const installBtn = document.getElementById('install-app-btn');
+    if(installBtn) installBtn.style.display = 'block'; 
+});
+
+// Jab user apne "Install App" button par click karega
+function installApp() {
+    if (!deferredPrompt) return;
+    
+    // Install wala popup dikhao
+    deferredPrompt.prompt();
+    
+    // Check karo user ne Install kiya ya Cancel
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            Swal.fire('Mubarak Ho! 🎉', 'GharManager aapke phone mein install ho raha hai!', 'success');
+            document.getElementById('install-app-btn').style.display = 'none'; // Button hata do
+        } else {
+            console.log('User ne cancel kar diya');
+        }
+        deferredPrompt = null;
+    });
+}
