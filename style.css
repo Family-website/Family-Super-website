@@ -1,36 +1,53 @@
-/* ==========================================
-   📏 EXACT FONT SIZE FIX (Sirf Size, Font wahi rahega)
-========================================== */
 
-/* 1. Main Title (GharManager) ka size medium kiya */
+/* ==========================================
+   ✨ PREMIUM FONT SYSTEM (MEDIUM SIZE)
+========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Quicksand:wght@500;700&display=swap');
+
+/* 1. App ka saara normal text aur numbers (Quicksand) */
+* {
+    font-family: 'Quicksand', sans-serif !important;
+}
+
+/* 2. Main Headings aur Titles (Poppins) - Size Medium kiya */
+h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
+    font-family: 'Poppins', sans-serif !important;
+    letter-spacing: 0.5px !important;
+}
+
 #app-title {
     font-size: 26px !important; 
 }
 
-/* 2. Total Kharcha (₹4676) ko screen ke hisaab se set kiya */
+/* Total Kharcha (₹4676) ko medium aur balanced kiya */
 #total-expense, #dudh-total-bill {
     font-size: 34px !important;
 }
 
-/* 3. Input Box aur Dropdown (Aditya, Sabji, Dawa) ko thoda chota kiya */
+/* 3. Buttons ko thoda bold aur size set kiya */
+.expense-btn, .nav-btn span {
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 700 !important;
+}
+
+.expense-btn {
+    font-size: 15px !important;
+    padding: 12px !important;
+}
+
+.nav-btn span {
+    font-size: 11px !important;
+}
+
+/* 4. Input Box, Dropdown aur Labels ko medium kiya */
 input, select, textarea {
     font-size: 15px !important; 
     padding: 10px 14px !important;
 }
 
-/* 4. Labels (Kaun kharcha kar raha hai?) */
 label {
     font-size: 13px !important; 
     margin-bottom: 4px !important;
-}
-
-/* 5. Buttons aur Bottom Menu */
-.expense-btn {
-    font-size: 15px !important; 
-    padding: 12px !important;
-}
-.nav-btn span {
-    font-size: 11px !important; 
 }
 
 
