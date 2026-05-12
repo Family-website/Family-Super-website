@@ -130,26 +130,6 @@
                     <h3>Hisaab & Reports</h3>
                     <input type="month" id="month-filter" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 12px; border: 1px solid #cbd5e1; font-weight: bold;" onchange="renderHistoryWithSkeleton()">
                     
-                    <div class="checklist-section">
-                        <h4 style="text-align:center; color:var(--text-main); font-size:14px; margin-bottom:10px; font-family:'Caveat', cursive;">📊 Expense Charts</h4>
-                        <canvas id="categoryChart"></canvas>
-                        <hr style="margin: 20px 0; border: 0; border-top: 1px dashed #cbd5e1;">
-                        <canvas id="memberChart"></canvas>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <button type="button" onclick="backupData()" style="flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer;">☁️ Backup</button>
-                        <label style="flex: 1; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-align: center;">
-                            🔄 Restore
-                            <input type="file" accept=".json" style="display: none;" onchange="restoreData(event)">
-                        </label>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <button type="button" onclick="exportToPDF()" style="flex:1; padding:12px; background:transparent; color:#e74c3c; border:2px solid #e74c3c; border-radius:12px; cursor:pointer; font-weight:bold;">📄 Save PDF</button>
-                        <button type="button" onclick="shareReport()" style="flex:1; padding:12px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">📤 Share</button>
-                    </div>
-                    
                     <ul id="history-list"></ul>
                 </div>
             </div>
@@ -257,41 +237,67 @@
         </div>
     </div>
 
-    <div id="profile-modal" class="lock-overlay" style="display: none; z-index: 1000000; align-items: flex-end; padding-bottom: 15px;">
-        <div class="lock-card profile-card-anim" style="width: 95%; max-width: 400px; margin: 0 auto; position: relative; padding: 30px 20px; background: var(--paper-bg); border-radius: 30px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1);">
-            <button onclick="closeProfile()" style="position: absolute; top: 15px; right: 15px; background: var(--line-color); border: none; font-size: 14px; cursor: pointer; color: #64748b; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">❌</button>
+    <div id="profile-modal" class="lock-overlay" style="display: none; z-index: 1000000; align-items: center; justify-content: center; padding: 15px;">
+        <div class="lock-card profile-card-anim" style="width: 95%; max-width: 400px; max-height: 85vh; overflow-y: auto; margin: 0 auto; position: relative; padding: 30px 20px; background: var(--paper-bg); border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
             
-            <div id="profile-avatar-large" class="anim-premium-icon" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--ink-blue), #8b5cf6); color: white; display: flex; justify-content: center; align-items: center; font-size: 38px; font-weight: 800; margin: 0 auto 15px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-family: 'Nunito', sans-serif; transition: 0.3s;">A</div>
+            <button onclick="closeProfile()" style="position: absolute; top: 15px; right: 15px; background: var(--line-color); border: none; font-size: 14px; cursor: pointer; color: #64748b; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10;">❌</button>
             
-            <h2 id="profile-name" style="font-family: 'Nunito', sans-serif; font-size: 26px; color: var(--ink-blue); font-weight: 800; margin-bottom: 2px; transition: 0.3s;">User</h2>
-            <p id="profile-email" style="color: #94a3b8; font-size: 14px; margin-bottom: 25px; font-weight: 700;">email@domain.com</p>
+            <div id="profile-avatar-large" class="anim-premium-icon" style="width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, var(--ink-blue), #8b5cf6); color: white; display: flex; justify-content: center; align-items: center; font-size: 32px; font-weight: 800; margin: 0 auto 10px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">A</div>
             
-            <div class="profile-stats" style="background: var(--line-color); border: 1.5px dashed #cbd5e1; border-radius: 20px; padding: 20px; margin-bottom: 20px; text-align: left;">
-                <p style="font-size: 13px; color: #64748b; font-weight: 800; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;">📊 Life-time App Stats</p>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
-                    <span style="font-weight: 700; color: var(--text-main);">💰 Total Kharcha:</span>
-                    <span id="profile-total-expense" style="font-weight: 800; color: var(--ink-red);">₹0</span>
+            <h2 id="profile-name" style="font-family: 'Nunito', sans-serif; font-size: 24px; color: var(--ink-blue); font-weight: 800; margin-bottom: 2px;">User</h2>
+            <p id="profile-email" style="color: #94a3b8; font-size: 13px; margin-bottom: 20px; font-weight: 700;">email@domain.com</p>
+            
+            <div class="profile-stats" style="background: var(--line-color); border: 1.5px dashed #cbd5e1; border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: left;">
+                <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">📊 Life-time Stats</p>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 13px;">💰 Total Kharcha:</span>
+                    <span id="profile-total-expense" style="font-weight: 800; color: var(--ink-red); font-size: 14px;">₹0</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 10px;">
-                    <span style="font-weight: 700; color: var(--text-main);">🥛 Dudh Bill:</span>
-                    <span id="profile-total-dudh" style="font-weight: 800; color: var(--ink-blue);">₹0</span>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 13px;">🥛 Dudh Bill:</span>
+                    <span id="profile-total-dudh" style="font-weight: 800; color: var(--ink-blue); font-size: 14px;">₹0</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                    <span style="font-weight: 700; color: var(--text-main);">🛒 Ration Items:</span>
-                    <span id="profile-total-ration" style="font-weight: 800; color: #8b5cf6;">0</span>
+                    <span style="font-weight: 700; color: var(--text-main); font-size: 13px;">🛒 Ration Items:</span>
+                    <span id="profile-total-ration" style="font-weight: 800; color: #8b5cf6; font-size: 14px;">0</span>
                 </div>
             </div>
-           <div style="display: flex; flex-direction: column; gap: 10px;">
+
+            <div class="checklist-section" style="background: var(--line-color); border-radius: 20px; padding: 15px; margin-bottom: 20px;">
+                <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">📈 Expense Charts</p>
+                <canvas id="categoryChart"></canvas>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #cbd5e1;">
+                <canvas id="memberChart"></canvas>
+            </div>
+
+            <div style="background: var(--line-color); border-radius: 20px; padding: 15px; margin-bottom: 20px;">
+                <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">💾 Data & Reports</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button type="button" onclick="exportToPDF()" style="flex:1; padding:10px; background:white; color:#e74c3c; border:1.5px solid #e74c3c; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📄 Save PDF</button>
+                    <button type="button" onclick="shareReport()" style="flex:1; padding:10px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📤 Share</button>
+                </div>
+
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" onclick="openThemeStore()" class="expense-btn" style="background: var(--line-color); color: var(--ink-blue); border: 2px solid var(--ink-blue); font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s;">🎨 Themes</button>
-                    <button type="button" onclick="toggleSound()" id="sound-toggle-btn" class="expense-btn" style="background: var(--line-color); color: #10b981; border: 2px solid #10b981; font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s;">🔊 Sound: ON</button>
+                    <button type="button" onclick="backupData()" style="flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size:13px;">☁️ Backup</button>
+                    <label style="flex: 1; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-align: center; font-size:13px; margin: 0;">
+                        🔄 Restore
+                        <input type="file" accept=".json" style="display: none;" onchange="restoreData(event)">
+                    </label>
+                </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="openThemeStore()" class="expense-btn" style="background: white; color: var(--ink-blue); border: 2px solid var(--ink-blue); font-size: 13px; padding: 10px; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🎨 Themes</button>
+                    <button type="button" onclick="toggleSound()" id="sound-toggle-btn" class="expense-btn" style="background: white; color: #10b981; border: 2px solid #10b981; font-size: 13px; padding: 10px; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🔊 Sound: ON</button>
                 </div>
                 
-                <button type="button" id="install-app-btn" onclick="installApp()" class="expense-btn" style="display: block; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 16px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: 0 4px 15px rgba(16,185,129,0.3); margin-top: 0; font-family: 'Nunito', sans-serif; font-weight: 800; transition: 0.3s; margin-bottom: 2px;">
+                <button type="button" id="install-app-btn" onclick="installApp()" class="expense-btn" style="display: block; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 14px; padding: 12px; border-radius: 12px; width: 100%; box-shadow: 0 4px 10px rgba(16,185,129,0.3); margin-top: 0; margin-bottom: 2px;">
                     📲 Install App To Home Screen
                 </button>
 
-                <button type="button" onclick="logout(); closeProfile();" class="expense-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 2px solid #ef4444; font-size: 15px; padding: 12px; border-radius: 16px; width: 100%; box-shadow: none; margin-top: 0; display: flex; align-items: center; justify-content: center; gap: 5px; font-family: 'Nunito', sans-serif; font-weight: 800;">🚪 Logout</button>
+                <button type="button" onclick="logout(); closeProfile();" class="expense-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 2px solid #ef4444; font-size: 14px; padding: 12px; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🚪 Logout</button>
             </div>
         </div>
     </div>
