@@ -314,7 +314,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./script.js?v=22"></script>
+    
     <script>
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
@@ -333,14 +333,33 @@
         }, 3500);
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./cloud.js"></script>   <script src="./auth.js"></script>    <script src="./expense.js"></script> <script src="./charts.js"></script>  <script src="./ui.js"></script>
-
+    <script src="./cloud.js?v=23"></script>
+    <script src="./auth.js?v=23"></script>
+    <script src="./charts.js?v=23"></script>
+    <script src="./expense.js?v=23"></script>
+    <script src="./ui.js?v=23"></script>
+    
+    <script>
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            const login = document.getElementById('login-screen');
+            const main = document.getElementById('main-app');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.display = 'none';
+                if (main && main.style.display !== 'block') {
+                    if (login) login.style.display = 'flex';
+                }
+            }
+        }, 3500);
+    </script>
+</body>
+</html>
 
 
 </body>
