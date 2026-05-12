@@ -66,4 +66,4 @@ async function syncOldLocalData() {
             localStorage.removeItem('rationItems'); 
         }
     } catch(e) { console.log("Error syncing local data:", e); }
-}
+
