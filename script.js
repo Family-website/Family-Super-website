@@ -109,10 +109,13 @@ function logout() {
 }
 
 // ==========================================
-// ☁️ 3. CLOUD DATA SYNC (LIVE LISTENER)
+// ☁️ 3. CLOUD DATA SYNC & GLOBALS
 // ==========================================
-let familyExpenses = []; let dudhRecords = []; let rationItems = []; let budgetLimit = 20000; 
-let customDisplayName = ""; // Naya variable naam ke liye
+let familyExpenses = []; let dudhRecords = []; let rationItems = []; 
+let budgetLimit = 20000; 
+let customDisplayName = ""; 
+let monthlyIncome = 0; // Naya: Income Tracker
+let userXP = 0; // Naya: Gamification
 
 function loadCloudData(uid) {
     try {
@@ -124,9 +127,12 @@ function loadCloudData(uid) {
                 dudhRecords = data.dudh || []; 
                 rationItems = data.ration || []; 
                 budgetLimit = data.budget || 20000;
-                customDisplayName = data.displayName || ""; // Cloud se naam uthaya
+                customDisplayName = data.displayName || ""; 
+                monthlyIncome = data.income || 0; // Cloud se income li
+                userXP = data.xp || 0; // Cloud se XP liya
+                
                 updateHisabUI(); updateDudhUI(); updateRationUI();
-                updateGreetingName(); // Naam screen par update kiya
+                updateGreetingName(); 
             } else { updateHisabUI(); }
         }, (error) => { console.error("Cloud fetch failed:", error); });
     } catch (error) { console.error("Cloud fetch exception:", error); }
@@ -140,7 +146,9 @@ async function saveToCloud() {
             dudh: dudhRecords, 
             ration: rationItems, 
             budget: budgetLimit,
-            displayName: customDisplayName // Cloud par naam save kiya
+            displayName: customDisplayName,
+            income: monthlyIncome, // Cloud pe save ki
+            xp: userXP // Cloud pe save ki
         }, { merge: true }); 
     } catch (error) { console.error("Cloud save failed:", error); }
 }
@@ -197,6 +205,17 @@ function updateGreetingName() {
 }
 
 // ==========================================
+// 🏆 3.8. XP SYSTEM (Gamification)
+// ==========================================
+function gainXP(amount) {
+    userXP += amount;
+    saveToCloud();
+    // Sweet alert silent toast
+    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true });
+    Toast.fire({ icon: 'success', title: `+${amount} XP Earned!` });
+}
+
+// ==========================================
 // 🎨 4. APP LOGIC & UI (Theme, Nav)
 // ==========================================
 let isDarkMode = localStorage.getItem('darkMode') === 'true';
@@ -208,6 +227,16 @@ function toggleTheme() {
     localStorage.setItem('darkMode', isDarkMode);
     if(categoryChartInstance) renderHistoryWithSkeleton(); 
     playSound('click');
+}
+
+// Naya: Auto Dark Mode (Raat ko khud dark ho jayega)
+function autoDarkMode() {
+    const hour = new Date().getHours();
+    if(hour >= 18 || hour < 6) {
+        if(localStorage.getItem('appTheme') === 'default' || !localStorage.getItem('appTheme')) {
+            applyTheme('night');
+        }
+    }
 }
 
 function openSection(sectionName, title) {
@@ -227,7 +256,7 @@ const todayDateString = new Date(new Date().getTime() - (new Date().getTimezoneO
 // ==========================================
 // 💰 5. HISAAB SECTION
 // ==========================================
-let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; 
+ let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; 
 const dateInput = document.getElementById('date'); if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter'); if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
 
@@ -247,13 +276,39 @@ if(receiptInput) {
 }
 
 function setBudget() { Swal.fire({ title: 'Monthly Budget', input: 'number', inputValue: budgetLimit, showCancelButton: true }).then((result) => { if (result.isConfirmed && result.value > 0) { budgetLimit = result.value; saveToCloud(); renderHistoryWithSkeleton(); } }); }
-function renderHistoryWithSkeleton() { const list = document.getElementById('history-list'); if(!list) return; list.innerHTML = `<div class="skeleton-box" style="height:60px; background:#e2e8f0; border-radius:8px; margin-bottom:10px; animation: smoothFadeIn 1s infinite alternate;"></div>`; setTimeout(updateHisabUI, 400); }
+
+// Naya: Income set karne ka system
+function setIncome() {
+    Swal.fire({ title: 'Is Mahine Ki Kamai (Income)', input: 'number', inputValue: monthlyIncome, showCancelButton: true }).then((result) => {
+        if (result.isConfirmed && result.value >= 0) {
+            monthlyIncome = parseFloat(result.value); saveToCloud(); updateHisabUI();
+        }
+    });
+}
+
+function renderHistoryWithSkeleton() { const list = document.getElementById('history-list'); if(!list) return; list.innerHTML = `<div class="skeleton-box"></div>`; setTimeout(updateHisabUI, 400); }
 
 function updateHisabUI() {
     const list = document.getElementById('history-list'); if(!list) return; list.innerHTML = ''; 
     const filterMonth = document.getElementById('month-filter').value || todayDateString.slice(0, 7);
     const budgetDisplay = document.getElementById('budget-display'); if(budgetDisplay) budgetDisplay.innerText = budgetLimit;
-    const filteredExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
+    
+    // Naya: Update Income UI
+    const incomeDisplay = document.getElementById('total-income-display'); 
+    if(incomeDisplay) incomeDisplay.innerText = `₹${monthlyIncome}`;
+
+    // Naya: Smart Search Logic
+    const searchInput = document.getElementById('search-expense');
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
+
+    const filteredExpenses = familyExpenses.filter(item => {
+        const matchMonth = item.date && item.date.startsWith(filterMonth);
+        const matchSearch = item.description.toLowerCase().includes(searchQuery) || 
+                            item.category.toLowerCase().includes(searchQuery) || 
+                            (item.member && item.member.toLowerCase().includes(searchQuery));
+        return matchMonth && matchSearch;
+    });
+
     let totalExpense = 0; let categoryTotals = { "Ration": 0, "Medical": 0, "Petrol": 0, "Shopping": 0, "Bills": 0, "Other": 0 }; let memberTotals = {};
     const uniqueDates = [...new Set(filteredExpenses.map(item => item.date))].sort((a, b) => new Date(b) - new Date(a));
 
@@ -303,7 +358,9 @@ function addExpense() {
     const newRecord = { member, category, description: desc, amount: amt, date, receipt: currentReceiptUrl };
 
     if(editExpenseIndex === -1) {
-        familyExpenses.push(newRecord); playSound('success');
+        familyExpenses.push(newRecord); 
+        gainXP(10); // Kharcha add karne par XP milega
+        playSound('success');
         if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
     } else {
         familyExpenses[editExpenseIndex] = newRecord; editExpenseIndex = -1; document.getElementById('btn-add-expense').innerText = "Kharcha Add Karein"; Swal.fire('Updated!', 'Update ho gaya.', 'success');
@@ -351,6 +408,7 @@ async function toggleRation(index) {
     if (item.bought && item.amount > 0) {
         const autoExpense = { member: "Aditya", category: "Ration", description: `🛒 ${item.name} (Ration)`, amount: item.amount, date: todayDateString, receipt: "" };
         familyExpenses.push(autoExpense);
+        gainXP(5); // Ration tick karne par 5 XP
         playSound('success');
         Swal.fire({ title: 'Hisaab mein juda!', text: `${item.name} ka ₹${item.amount} 'GharManager' mein add ho gaya hai. ✅`, icon: 'success', timer: 2000, showConfirmButton: false });
     }
@@ -394,14 +452,14 @@ function calculateEMI() {
     const p = parseFloat(document.getElementById('emi-principal').value); const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100; const n = parseFloat(document.getElementById('emi-time').value);
     if (isNaN(p) || isNaN(r) || isNaN(n) || p <= 0 || n <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
     const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); const totalAmount = emi * n;
-    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; document.getElementById('emi-interest').innerText = `₹${Math.round(totalAmount - p)}`; document.getElementById('emi-total').innerText = `₹${Math.round(totalAmount)}`;
+    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; 
     playSound('click');
 }
 function calculateVyaj() {
     const p = parseFloat(document.getElementById('vyaj-principal').value); const rate = parseFloat(document.getElementById('vyaj-rate').value); const time = parseFloat(document.getElementById('vyaj-time').value);
     if (isNaN(p) || isNaN(rate) || isNaN(time) || p <= 0 || time <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
     const interest = (p * rate * time) / 100;
-    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; document.getElementById('vyaj-total').innerText = `₹${Math.round(p + interest)}`;
+    document.getElementById('vyaj-result').style.display = 'block'; document.getElementById('vyaj-only').innerText = `₹${Math.round(interest)}`; 
     playSound('click');
 }
 
@@ -451,14 +509,23 @@ function startVoice() {
 }
 
 // ==========================================
-// 👤 12. USER PROFILE SYSTEM
+// 👤 12. USER PROFILE SYSTEM (XP Update)
 // ==========================================
 function openProfile() {
     const modal = document.getElementById('profile-modal'); if(!modal) return;
     if (currentUser) {
         document.getElementById('profile-email').innerText = currentUser.email;
-        updateGreetingName(); // Naya naam set karne ke liye
+        updateGreetingName(); 
     }
+    
+    // XP Level Badge Update
+    const lvlBadge = document.getElementById('profile-level-badge');
+    if(lvlBadge) {
+        let level = Math.floor(userXP / 100) + 1;
+        let title = level < 3 ? "Beginner 🥉" : level < 6 ? "Pro Saver 🥈" : "Finance Ninja 🥇";
+        lvlBadge.innerText = `Level ${level} | ${title} (XP: ${userXP})`;
+    }
+
     let totalExpAllTime = familyExpenses.reduce((sum, item) => sum + item.amount, 0); document.getElementById('profile-total-expense').innerText = `₹${totalExpAllTime}`;
     let totalDudhAllTime = dudhRecords.reduce((sum, item) => sum + ((item.morning + item.evening) * item.rate), 0); document.getElementById('profile-total-dudh').innerText = `₹${Math.round(totalDudhAllTime)}`;
     document.getElementById('profile-total-ration').innerText = rationItems.length;
@@ -468,7 +535,47 @@ function openProfile() {
 function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; playSound('click'); }
 
 // ==========================================
-// 🎨 13. THEME STORE SYSTEM
+// 🤖 13. LOCAL AI FINANCIAL ASSISTANT
+// ==========================================
+function askFinanceAI() {
+    if(familyExpenses.length === 0) return Swal.fire('🤖 AI', 'Bhai, pehle kuch kharcha toh add karo, tabhi toh hisaab bataunga!', 'info');
+    
+    // 1. Sabse zyada kharcha kahan hua?
+    let catTotals = {}; let maxCat = ""; let maxAmt = 0;
+    familyExpenses.forEach(exp => {
+        catTotals[exp.category] = (catTotals[exp.category] || 0) + exp.amount;
+        if(catTotals[exp.category] > maxAmt) { maxAmt = catTotals[exp.category]; maxCat = exp.category; }
+    });
+
+    // 2. Savings check (Income - Expense)
+    let filterMonth = document.getElementById('month-filter') ? document.getElementById('month-filter').value : todayDateString.slice(0,7);
+    let monthExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
+    let totalExpMonth = monthExpenses.reduce((sum, item) => sum + item.amount, 0);
+    
+    let savings = monthlyIncome - totalExpMonth;
+    let savingsMsg = savings > 0 
+        ? `<span style="color:#16a34a; font-weight:bold;">Badiya! Tumne is mahine ₹${savings} bacha liye hain. 🤑</span>` 
+        : `<span style="color:#e74c3c; font-weight:bold;">Alert! Tumhari kamai se zyada kharcha (₹${Math.abs(savings)} extra) ho raha hai! 📉</span>`;
+
+    Swal.fire({
+        title: '🤖 AI Finance Tips',
+        html: `
+            <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                <p>📊 <b>Top Kharcha:</b> Sabse zyada paisa <b>${maxCat} (₹${maxAmt})</b> mein gaya hai. Thoda control karo!</p>
+                <hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;">
+                <p>💰 <b>Savings:</b> ${savingsMsg}</p>
+                <hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;">
+                <p>💡 <b>AI Tip:</b> "Rule of 50-30-20 yaad rakho. 50% zaroorat, 30% shauk, aur 20% future ke liye save karo."</p>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Thanks AI! 👍',
+        confirmButtonColor: '#6366f1'
+    });
+}
+
+// ==========================================
+// 🎨 14. THEME STORE SYSTEM
 // ==========================================
 function openThemeStore() { closeProfile(); document.getElementById('theme-modal').style.display = 'flex'; playSound('click'); }
 function closeThemeStore() { document.getElementById('theme-modal').style.display = 'none'; playSound('click'); }
@@ -482,45 +589,29 @@ function applyTheme(themeName) {
 window.addEventListener('DOMContentLoaded', () => {
     let savedAppTheme = localStorage.getItem('appTheme'); if(savedAppTheme) document.body.setAttribute('data-theme', savedAppTheme);
     updateSoundUI();
+    autoDarkMode(); // App khulte hi check karega
 });
 
 // ==========================================
-// 📲 14. PWA INSTALL & SERVICE WORKER LOGIC
+// 📲 15. PWA INSTALL & SERVICE WORKER LOGIC
 // ==========================================
 let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
 
-// Browser ka auto prompt intercept karo
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-});
-
-// Apne "Install App" button ka click function
 function installApp() {
     if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                Swal.fire('Mubarak Ho! 🎉', 'GharManager phone mein install ho gaya hai!', 'success');
-            }
+            if (choiceResult.outcome === 'accepted') { Swal.fire('Mubarak Ho! 🎉', 'GharManager phone mein install ho gaya hai!', 'success'); }
             deferredPrompt = null;
         });
     } else {
-        // Agar Chrome ne auto-prompt nahi diya, toh user ko step-by-step guide karo
-        Swal.fire({
-            title: 'Install Kaise Karein?',
-            text: 'Bhai, upar Right corner mein 3-dots (⋮) par click karo aur wahan se "Add to Home screen" daba do!',
-            icon: 'info',
-            confirmButtonText: 'Theek hai 👍'
-        });
+        Swal.fire({ title: 'Install Kaise Karein?', text: 'Bhai, upar Right corner mein 3-dots (⋮) par click karo aur wahan se "Add to Home screen" daba do!', icon: 'info', confirmButtonText: 'Theek hai 👍' });
     }
 }
 
-// Service Worker Register
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('✅ Service Worker Active!'))
-            .catch(err => console.error('❌ Service Worker Error', err));
+        navigator.serviceWorker.register('./sw.js').then(reg => console.log('✅ Service Worker Active!')).catch(err => console.error('❌ Service Worker Error', err));
     });
 }
