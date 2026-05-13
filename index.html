@@ -9,26 +9,22 @@
     <link rel="apple-touch-icon" href="./icon.png">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#2563eb">
-    <meta name="description" content="GharManager - Ghar ka hisaab, EMI calculator, Dudh aur Ration ka record.">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="./style.css?v=phase2">
+    <link rel="stylesheet" href="./style.css?v=phase3">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    
-    <link rel="shortcut icon" href="./icon.png" type="image/png">
-    <meta name="google-site-verification" content="fZwGT-hq1h80Z_KN46QPPakhStF9F_geRxz_t1Wg2K0" />
 </head>
 <body>
 
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <img src="./icon.png" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 15px; border: 3px solid white;">
         <h1 style="font-family: 'Caveat', cursive; font-size: 44px; color: #2563eb; font-weight: 700;">GharManager</h1>
-        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; color: #94a3b8; font-weight: 700;">Loading Your Cloud... ⏳</p>
+        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; color: #94a3b8; font-weight: 700;">Loading Phase 3... ⏳</p>
     </div>
 
     <div id="login-screen" class="lock-overlay" style="display: none;">
@@ -38,12 +34,12 @@
             <p id="lock-desc" style="margin-bottom: 20px; color: #94a3b8; font-size: 13px; font-weight: 700;">Humesha ke liye jud jaayein!</p>
             
             <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px;">
-                <input type="email" id="email-input" placeholder="Email ID" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 14px; outline: none; width: 100%;">
-                <input type="password" id="password-input" placeholder="Password (Min 6 letters)" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 14px; outline: none; width: 100%;">
+                <input type="email" id="email-input" placeholder="Email ID" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-size: 14px; outline: none; width: 100%;">
+                <input type="password" id="password-input" placeholder="Password (Min 6 letters)" style="padding: 12px; border-radius: 12px; border: 1.5px solid #cbd5e1; font-size: 14px; outline: none; width: 100%;">
             </div>
 
             <button type="button" onclick="loginWithEmail()" class="expense-btn" style="background: #2563eb; color: white; margin-bottom: 10px; font-size: 18px !important; padding: 12px; font-family: 'Caveat', cursive !important;">🚀 Login Karein</button>
-            <button type="button" onclick="registerWithEmail()" style="background: transparent; border: 2px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold; font-family: 'Nunito', sans-serif;">Naya Account Banayein</button>
+            <button type="button" onclick="registerWithEmail()" style="background: transparent; border: 2px solid #2563eb; color: #2563eb; padding: 10px; border-radius: 12px; width: 100%; font-weight: bold;">Naya Account Banayein</button>
             <p id="login-status" style="margin-top: 15px; font-size: 13px; color: #2563eb; display: none; font-weight: bold;">Connecting... ⏳</p>
         </div>
     </div>
@@ -79,7 +75,6 @@
                     <div style="width:100%; background:#ecf0f1; border-radius:10px; height:8px; overflow:hidden;">
                         <div id="budget-bar" style="height:100%; width:0%; background:#2ecc71; transition:width 0.5s ease;"></div>
                     </div>
-                    <p id="budget-warning" style="font-size:12px; color:#e74c3c; margin-top:8px; display:none; font-weight: bold;">⚠️ Alert: Budget limit cross hone wali hai!</p>
                 </div>
 
                 <div class="form-section" style="background: rgba(34, 197, 94, 0.1); border: 2px dashed #22c55e; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; padding: 15px;">
@@ -87,7 +82,7 @@
                         <p style="font-size: 12px; color: #166534; font-weight: bold;">Kamai (Income)</p>
                         <h2 id="total-income-display" style="color: #15803d; font-size: 22px; font-weight: 800;">₹0</h2>
                     </div>
-                    <button type="button" onclick="setIncome()" style="background: #16a34a; color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);">+ Add</button>
+                    <button type="button" onclick="setIncome()" style="background: #16a34a; color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer;">+ Add</button>
                 </div>
 
                 <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 15px; border-radius: 20px; margin: 0 20px 15px 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -100,8 +95,15 @@
                     </div>
                 </div>
 
-                <div style="margin: 0 20px 15px 20px;">
-                    <input type="text" id="search-expense" placeholder="🔍 Search (e.g. Ration, Papa, Petrol)..." onkeyup="updateHisabUI()" style="border: 2px solid var(--line-color); background: var(--paper-bg); font-weight: bold; margin-bottom: 0;">
+                <div style="margin: 0 20px 15px 20px; display: flex; gap: 10px;">
+                    <input type="text" id="search-expense" placeholder="🔍 Search..." onkeyup="updateHisabUI()" style="flex: 2; border: 2px solid var(--line-color); background: var(--paper-bg); font-weight: bold; margin-bottom: 0;">
+                    <select id="family-filter" onchange="updateHisabUI()" style="flex: 1; border: 2px solid var(--line-color); background: var(--paper-bg); font-weight: bold; margin-bottom: 0;">
+                        <option value="All">All Family</option>
+                        <option value="Papa">Papa</option>
+                        <option value="Mummy">Mummy</option>
+                        <option value="Aditya">Aditya</option>
+                        <option value="Bhai/Behan">Bhai/Behan</option>
+                    </select>
                 </div>
 
                 <div class="form-section">
@@ -126,7 +128,7 @@
                     <label>Kharcha kis cheez par hua?</label>
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                         <input type="text" id="description" placeholder="e.g., Sabji, Dawa" style="margin-bottom: 0;">
-                        <button type="button" id="mic-btn" onclick="startVoice()" style="background:var(--ink-blue); color:white; border:none; border-radius:12px; padding:0 15px; cursor:pointer; font-size: 18px; transition: 0.3s;">🎤</button>
+                        <button type="button" id="mic-btn" onclick="startVoice()" style="background:var(--ink-blue); color:white; border:none; border-radius:12px; padding:0 15px; cursor:pointer; font-size: 18px;">🎤</button>
                     </div>
                     
                     <label>Kitne paise lage?</label>
@@ -135,16 +137,12 @@
                     <label>Kis din?</label>
                     <input type="date" id="date">
 
-                    <label>Receipt ki Photo (Optional)</label>
-                    <input type="file" id="receipt-img" accept="image/*" style="font-size: 12px; padding: 5px;">
-                    <img id="receipt-preview" style="display:none; width:100%; max-height:150px; object-fit:contain; margin-top:5px; border-radius:10px;">
-                    
                     <button type="button" class="expense-btn" id="btn-add-expense" onclick="addExpense()">Kharcha Add Karein</button>
                 </div>
 
                 <div class="history-section">
                     <h3>Hisaab & Reports</h3>
-                    <input type="month" id="month-filter" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--line-color); background: var(--paper-bg); color: var(--text-main); font-weight: bold;" onchange="renderHistoryWithSkeleton()">
+                    <input type="month" id="month-filter" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 12px; border: 1px solid var(--line-color); background: var(--paper-bg); font-weight: bold;" onchange="renderHistoryWithSkeleton()">
                     <ul id="history-list"></ul>
                 </div>
             </div>
@@ -226,7 +224,7 @@
                 </div>
                 <div class="history-section">
                     <h3 style="display: flex; justify-content: space-between; align-items: center;">Ration List</h3>
-                    <p style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">(Tick karne par ye apne aap kharche mein jud jayega! ✅)</p>
+                    <p style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">(Tick karne par hisaab me judega, Low Stock dabane par alert aayega!)</p>
                     <ul id="ration-list"></ul>
                 </div>
             </div>
@@ -296,8 +294,19 @@
             </div>
             <p id="profile-email" style="color: #94a3b8; font-size: 13px; margin-bottom: 10px; font-weight: 700;">email@domain.com</p>
 
-            <p id="profile-level-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">Level 1 | Beginner 🥉</p>
+            <p id="profile-level-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">Level 1 | Beginner 🥉</p>
             
+            <div style="background: #fdf4ff; border: 1.5px solid #d946ef; border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: left;">
+                <p style="font-size: 12px; color: #a21caf; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">🏆 30-Day No Junk Food Challenge</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <span style="font-weight: 700; color: #701a75; font-size: 13px;">Progress: <span id="challenge-days">0</span>/30 Days</span>
+                    <button onclick="progressChallenge()" style="background: #d946ef; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer;">Mark Today ✅</button>
+                </div>
+                <div style="width:100%; background:#f0abfc; border-radius:10px; height:6px; overflow:hidden;">
+                    <div id="challenge-bar" style="height:100%; width:0%; background:#a21caf; transition:width 0.5s ease;"></div>
+                </div>
+            </div>
+
             <div class="profile-stats" style="background: var(--line-color); border: 1.5px dashed #cbd5e1; border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: left;">
                 <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">📊 Life-time Stats</p>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
@@ -307,10 +316,6 @@
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px;">
                     <span style="font-weight: 700; color: var(--text-main); font-size: 13px;">🥛 Dudh Bill:</span>
                     <span id="profile-total-dudh" style="font-weight: 800; color: var(--ink-blue); font-size: 14px;">₹0</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-weight: 700; color: var(--text-main); font-size: 13px;">🛒 Ration Items:</span>
-                    <span id="profile-total-ration" style="font-weight: 800; color: #8b5cf6; font-size: 14px;">0</span>
                 </div>
             </div>
 
@@ -376,7 +381,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./script.js?v=phase2"></script>
+    <script src="./script.js?v=phase3"></script>
 
     <script>
         setTimeout(() => {
