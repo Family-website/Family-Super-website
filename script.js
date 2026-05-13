@@ -72,7 +72,7 @@ auth.onAuthStateChanged(async (user) => {
         setTimeout(() => {
             if(loginScreen) loginScreen.style.display = 'none';
             if(mainApp) mainApp.style.display = 'block';
-            checkSmartReminders(); // 🔔 NAYA: App khulte hi Reminders Check karega!
+            checkSmartReminders(); 
         }, 300);
     } else {
         currentUser = null;
@@ -110,14 +110,14 @@ function logout() {
 }
 
 // ==========================================
-// ☁️ 3. CLOUD DATA SYNC & GLOBALS (PHASE 3)
+// ☁️ 3. CLOUD DATA SYNC & GLOBALS
 // ==========================================
 let familyExpenses = []; let dudhRecords = []; let rationItems = []; let investments = [];
 let budgetLimit = 20000; 
 let customDisplayName = ""; 
 let monthlyIncome = 0; 
 let userXP = 0; 
-let challengeDays = 0; // NAYA: Savings challenge ke dino ka hisaab
+let challengeDays = 0; 
 
 function showSyncSuccess() {
     const syncEl = document.getElementById('sync-status');
@@ -142,7 +142,7 @@ function loadCloudData(uid) {
                 customDisplayName = data.displayName || ""; 
                 monthlyIncome = data.income || 0; 
                 userXP = data.xp || 0; 
-                challengeDays = data.challengeDays || 0; // NAYA: Cloud se fetch
+                challengeDays = data.challengeDays || 0; 
                 
                 updateHisabUI(); updateDudhUI(); updateRationUI(); updateInvestUI();
                 updateGreetingName(); updateChallengeUI();
@@ -175,30 +175,25 @@ async function syncOldLocalData() {
 }
 
 // ==========================================
-// 🔔 3.2. SMART REMINDERS (PHASE 3)
+// 🔔 3.2. SMART REMINDERS
 // ==========================================
 function checkSmartReminders() {
     let todayDate = new Date().getDate();
     let reminderShown = sessionStorage.getItem('reminderShownToday');
-    
-    // Agar aaj reminder nahi dikhaya hai
     if(!reminderShown) {
         if(todayDate >= 1 && todayDate <= 5) {
             Swal.fire({ title: '🔔 EMI Alert!', text: 'Mahaul tight hai! Mahine ke shuruat ke din hain, agar koi EMI ya kiraya baaki hai toh check kar lo!', icon: 'info', confirmButtonText: 'Theek Hai', confirmButtonColor: '#3b82f6' });
         }
-        // Agar ration list mein 3 se zyada low stock items hain
         let lowStockCount = rationItems.filter(i => i.lowStock).length;
         if(lowStockCount >= 3) {
-            setTimeout(() => {
-                Swal.fire({ title: '🛒 Ration Khatam!', text: `Tumhare ${lowStockCount} ration items low stock par hain. Market jaane ka time aa gaya hai!`, icon: 'warning', confirmButtonColor: '#a855f7' });
-            }, 3000); // Pehle alert ke thodi der baad
+            setTimeout(() => { Swal.fire({ title: '🛒 Ration Khatam!', text: `Tumhare ${lowStockCount} ration items low stock par hain. Market jaane ka time aa gaya hai!`, icon: 'warning', confirmButtonColor: '#a855f7' }); }, 3000);
         }
         sessionStorage.setItem('reminderShownToday', 'true');
     }
 }
 
 // ==========================================
-// 🏆 3.8. XP & SAVINGS CHALLENGE (PHASE 3)
+// 🏆 3.8. XP & SAVINGS CHALLENGE
 // ==========================================
 function updateProfileName() {
     const currentName = customDisplayName || (currentUser ? currentUser.email.split("@")[0] : "User");
@@ -226,22 +221,13 @@ function progressChallenge() {
         Swal.fire('Wah Bhai Wah! 🎉', 'Tumne 30 din ka challenge poora kar liya! You are a Finance Ninja!', 'success');
         return;
     }
-    challengeDays += 1;
-    gainXP(50); // Challenge mark karne par 50 XP
-    saveToCloud();
-    updateChallengeUI();
-    playSound('success');
+    challengeDays += 1; gainXP(50); saveToCloud(); updateChallengeUI(); playSound('success');
     if(typeof confetti !== 'undefined') confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
 }
 
 function updateChallengeUI() {
-    let bar = document.getElementById('challenge-bar');
-    let text = document.getElementById('challenge-days');
-    if(bar && text) {
-        let percent = (challengeDays / 30) * 100;
-        bar.style.width = `${percent}%`;
-        text.innerText = challengeDays;
-    }
+    let bar = document.getElementById('challenge-bar'); let text = document.getElementById('challenge-days');
+    if(bar && text) { let percent = (challengeDays / 30) * 100; bar.style.width = `${percent}%`; text.innerText = challengeDays; }
 }
 
 // ==========================================
@@ -261,9 +247,7 @@ function toggleTheme() {
 function autoDarkMode() {
     const hour = new Date().getHours();
     if(hour >= 18 || hour < 6) {
-        if(localStorage.getItem('appTheme') === 'default' || !localStorage.getItem('appTheme')) {
-            applyTheme('night');
-        }
+        if(localStorage.getItem('appTheme') === 'default' || !localStorage.getItem('appTheme')) { applyTheme('night'); }
     }
 }
 
@@ -294,9 +278,50 @@ function updatePrediction(totalMonthExpense) {
 }
 
 // ==========================================
-// 💰 5. HISAAB SECTION (Phase 3: Family Filter)
+// 📅 4.5. SMART CALENDAR VIEW (PHASE 4)
 // ==========================================
-let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; 
+function renderCalendar(expenses, filterMonth) {
+    const calEl = document.getElementById('expense-calendar'); if(!calEl) return;
+    calEl.innerHTML = '';
+    const year = parseInt(filterMonth.split('-')[0]); const month = parseInt(filterMonth.split('-')[1]) - 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Header days
+    const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    days.forEach(d => { 
+        const el = document.createElement('div'); el.innerText = d; 
+        el.style.fontWeight = 'bold'; el.style.color = 'var(--text-muted)'; el.style.fontSize = '12px'; 
+        calEl.appendChild(el); 
+    });
+    
+    let firstDay = new Date(year, month, 1).getDay();
+    for(let i=0; i<firstDay; i++) calEl.appendChild(document.createElement('div'));
+    
+    let dailyTotals = {};
+    expenses.forEach(exp => { 
+        let day = parseInt(exp.date.split('-')[2]); 
+        dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; 
+    });
+    
+    for(let i=1; i<=daysInMonth; i++) {
+        const el = document.createElement('div'); el.innerText = i; 
+        el.style.padding = '6px 0'; el.style.borderRadius = '8px'; el.style.fontSize = '12px'; el.style.fontWeight = 'bold';
+        
+        if(dailyTotals[i]) {
+            if(dailyTotals[i] > 1000) { el.style.background = '#ef4444'; el.style.color = 'white'; } // High
+            else if(dailyTotals[i] > 300) { el.style.background = '#f59e0b'; el.style.color = 'white'; } // Med
+            else { el.style.background = '#10b981'; el.style.color = 'white'; } // Low
+        } else { 
+            el.style.background = 'var(--line-color)'; el.style.color = 'var(--text-main)'; 
+        }
+        calEl.appendChild(el);
+    }
+}
+
+// ==========================================
+// 💰 5. HISAAB SECTION
+// ==========================================
+let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; let trendChartInstance = null;
 const dateInput = document.getElementById('date'); if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter'); if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
 
@@ -329,14 +354,13 @@ function updateHisabUI() {
     const searchInput = document.getElementById('search-expense');
     const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
     
-    // 👨‍👩‍👧 NAYA: FAMILY FILTER LOGIC
     const familyFilterInput = document.getElementById('family-filter');
     const familyQuery = familyFilterInput ? familyFilterInput.value : "All";
 
     const filteredExpenses = familyExpenses.filter(item => {
         const matchMonth = item.date && item.date.startsWith(filterMonth);
         const matchSearch = item.description.toLowerCase().includes(searchQuery) || item.category.toLowerCase().includes(searchQuery) || (item.member && item.member.toLowerCase().includes(searchQuery));
-        const matchFamily = familyQuery === "All" ? true : (item.member === familyQuery); // Filter by person
+        const matchFamily = familyQuery === "All" ? true : (item.member === familyQuery); 
         return matchMonth && matchSearch && matchFamily;
     });
 
@@ -371,7 +395,39 @@ function updateHisabUI() {
     }
     
     updatePrediction(totalExpense); 
-    renderCategoryChart(categoryTotals); renderMemberChart(memberTotals);
+    renderCalendar(filteredExpenses, filterMonth); // NAYA: Calendar Call
+    renderCategoryChart(categoryTotals); 
+    renderMemberChart(memberTotals);
+    renderTrendChart(filteredExpenses); // NAYA: Analytics Trend Chart Call
+}
+
+// --- 📊 ADVANCED ANALYTICS CHARTS (PHASE 4) ---
+function renderTrendChart(expenses) {
+    const ctx = document.getElementById('trendChart'); if(!ctx) return; 
+    if(trendChartInstance) trendChartInstance.destroy();
+    
+    let dailyTotals = {};
+    expenses.forEach(exp => { 
+        let day = exp.date.split('-')[2]; 
+        dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; 
+    });
+    
+    const labels = Object.keys(dailyTotals).sort((a,b) => parseInt(a) - parseInt(b));
+    const data = labels.map(day => dailyTotals[day]);
+    const textColor = isDarkMode ? '#fff' : '#333';
+    
+    trendChartInstance = new Chart(ctx.getContext('2d'), { 
+        type: 'bar', 
+        data: { 
+            labels: labels.map(l => l + ' Date'), 
+            datasets: [{ label: 'Daily Spend (₹)', data: data, backgroundColor: '#8b5cf6', borderRadius: 6 }] 
+        }, 
+        options: { 
+            responsive: true, 
+            plugins: { legend: { labels: { color: textColor } } }, 
+            scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } } 
+        } 
+    });
 }
 
 function renderCategoryChart(dataObj) {
@@ -434,7 +490,7 @@ function addInvestment() {
 function deleteInvestment(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true }).then((result) => { if (result.isConfirmed) { investments.splice(index, 1); saveToCloud(); updateInvestUI(); } }); }
 
 // ==========================================
-// 🛒 6. RATION LOGIC (Phase 3: Low Stock System)
+// 🛒 6. RATION LOGIC
 // ==========================================
 const rationDateInput = document.getElementById('ration-date'); if(rationDateInput) rationDateInput.value = todayDateString;
 
@@ -448,8 +504,8 @@ function updateRationUI() {
         rationItems.forEach((item, index) => {
             if(item.date === dateStr) {
                 const li = document.createElement('li'); 
-                li.style.borderLeft = item.lowStock ? "4px solid #ef4444" : "4px solid #8e44ad"; // ⚠️ Red border if low stock
-                li.style.background = item.lowStock ? "#fef2f2" : "var(--line-color)"; // ⚠️ Light red bg if low stock
+                li.style.borderLeft = item.lowStock ? "4px solid #ef4444" : "4px solid #8e44ad";
+                li.style.background = item.lowStock ? "#fef2f2" : "var(--line-color)"; 
                 
                 li.innerHTML = `
                 <div class="list-left ration-item" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer; opacity: ${item.bought ? '0.5' : '1'}; flex: 2;">
@@ -488,13 +544,7 @@ async function toggleRation(index) {
     await saveToCloud(); updateRationUI(); updateHisabUI();
 }
 
-// ⚠️ NAYA: Low Stock Toggle System
-function toggleLowStock(index) {
-    rationItems[index].lowStock = !rationItems[index].lowStock;
-    playSound('click');
-    saveToCloud(); updateRationUI();
-}
-
+function toggleLowStock(index) { rationItems[index].lowStock = !rationItems[index].lowStock; playSound('click'); saveToCloud(); updateRationUI(); }
 function deleteRation(index) { rationItems.splice(index, 1); saveToCloud(); updateRationUI(); }
 
 // ==========================================
