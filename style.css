@@ -1,6 +1,6 @@
 /* ==========================================
    ✨ GHARMANAGER : NEXT-LEVEL UI/UX SYSTEM
-   (3D, iOS Toggles, Blobs, Ripple, Skeletons)
+   (Full & Final - Bug Free Code)
 ========================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Quicksand:wght@500;700&display=swap');
@@ -15,7 +15,7 @@
     --ink-blue: #2563eb;
     --ink-red: #ef4444;
     --shadow-color: rgba(37, 99, 235, 0.15);
-    --btn-shadow: #1e40af; /* 3D Button Depth */
+    --btn-shadow: #1e40af; 
 }
 
 /* Dark Mode Theme */
@@ -28,14 +28,20 @@
     --ink-blue: #60a5fa;
     --ink-red: #f87171;
     --shadow-color: rgba(0, 0, 0, 0.5);
-    --btn-shadow: #1e293b;
+    --btn-shadow: #0f172a;
 }
+
+/* Theme Store Colors */
+[data-theme="nature"] { --bg-color: #f0fdf4; --ink-blue: #16a34a; --btn-shadow: #14532d; --shadow-color: rgba(22, 163, 74, 0.15); }
+[data-theme="sunset"] { --bg-color: #faf5ff; --ink-blue: #9333ea; --btn-shadow: #581c87; --shadow-color: rgba(147, 51, 234, 0.15); }
+[data-theme="coffee"] { --bg-color: #fffbeb; --ink-blue: #b45309; --btn-shadow: #78350f; --shadow-color: rgba(180, 83, 9, 0.15); }
+[data-theme="rose"] { --bg-color: #fff1f2; --ink-blue: #e11d48; --btn-shadow: #881337; --shadow-color: rgba(225, 29, 72, 0.15); }
 
 /* Base Styles & Medium Fonts */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Quicksand', sans-serif !important;
-    transition: background-color 0.4s ease, color 0.4s ease; /* Dynamic Theme Smoothness */
+    transition: background-color 0.4s ease, color 0.4s ease; 
 }
 
 body {
@@ -51,7 +57,11 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
 }
 
 #app-title { font-size: 26px !important; }
-#total-expense, #dudh-total-bill { font-size: 34px !important; }
+#total-expense, #dudh-total-bill { font-size: 34px !important; font-weight: 800 !important; }
+
+/* Structure */
+.app-container { max-width: 600px; margin: 0 auto; min-height: 100vh; position: relative; padding-bottom: 90px; }
+.content-area { padding-bottom: 20px; }
 
 /* --- 💧 2. LIQUID BLOB & FLOATING ANIMATIONS --- */
 .anim-premium-icon {
@@ -65,7 +75,6 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
     50% { transform: translateY(-8px) rotate(3deg); }
 }
 
-/* Liquid Blob Background Effect (For Modal/Cards) */
 .profile-card-anim::before {
     content: ''; position: absolute;
     width: 150px; height: 150px;
@@ -90,18 +99,15 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
     font-weight: 700 !important; font-size: 15px !important;
     padding: 12px 20px !important; width: 100%;
     margin-top: 15px; cursor: pointer;
-    
-    /* 3D Effect */
     box-shadow: 0 5px 0 var(--btn-shadow), 0 10px 20px var(--shadow-color);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .expense-btn:active {
-    transform: translateY(5px); /* Button dabne ka effect */
+    transform: translateY(5px); 
     box-shadow: 0 0px 0 var(--btn-shadow), 0 5px 10px var(--shadow-color);
 }
 
-/* CSS Ripple Effect Hack */
 .expense-btn::after {
     content: ''; position: absolute;
     top: 50%; left: 50%; width: 0; height: 0;
@@ -150,10 +156,18 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
 }
 
 /* --- 📊 6. ANIMATED CHARTS & CARDS ENTRANCE --- */
-.app-section { display: none; opacity: 0; animation: slideUp 0.4s ease forwards; }
-.active-section { display: block; }
+.app-section { display: none; }
+.active-section { 
+    display: block; 
+    animation: sectionFadeIn 0.4s ease forwards; 
+}
 
-.balance-card, .form-section, .history-section, .result-card {
+@keyframes sectionFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.balance-card, .form-section, .history-section, .result-card, .budget-section {
     background: var(--paper-bg);
     border-radius: 20px; padding: 20px; margin: 15px 20px;
     box-shadow: 0 8px 25px var(--shadow-color);
@@ -161,8 +175,9 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
     animation: slideUpFade 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Staggered Loading Effect */
-.balance-card { animation-delay: 0.1s; }
+.balance-card { animation-delay: 0.1s; background: #fef08a; }
+.balance-card p { font-size: 14px; font-weight: bold; color: #854d0e; }
+.balance-card h1 { color: #b91c1c; }
 .form-section { animation-delay: 0.2s; }
 .history-section { animation-delay: 0.3s; }
 
@@ -190,9 +205,8 @@ h1, h2, h3, h4, #app-title, #lock-title, .balance-card p {
 }
 
 .nav-btn i { font-size: 22px; transition: transform 0.3s; }
-.nav-btn span { font-size: 11px !important; font-weight: 700 !important; margin-top: 4px; }
+.nav-btn span { font-family: 'Poppins', sans-serif !important; font-size: 11px !important; font-weight: 700 !important; margin-top: 4px; }
 
-/* Active & Magnetic Hover State */
 .active-nav { color: var(--ink-blue); }
 .active-nav i { transform: translateY(-5px) scale(1.2); filter: drop-shadow(0 5px 5px var(--shadow-color)); }
 .nav-btn:active i { transform: scale(0.9); }
@@ -223,21 +237,29 @@ li {
 }
 li:hover { transform: translateX(5px); }
 
+.list-left { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.list-right { display: flex; align-items: center; justify-content: flex-end; }
+
 .action-btn {
     background: var(--paper-bg); border: none; border-radius: 8px;
     padding: 6px; cursor: pointer; margin-left: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; font-size: 14px;
 }
 .action-btn:active { transform: scale(0.8); }
 
 .member-badge { background: #e0e7ff; color: #4f46e5; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; }
 .category-badge { background: #fef3c7; color: #d97706; padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; }
 
+.theme-btn { padding: 10px; border-radius: 12px; font-weight: bold; cursor: pointer; border: 2px solid transparent; transition: 0.2s; font-size: 13px; }
+.theme-btn:active { transform: scale(0.95); }
+
 .lock-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); /* Glassmorphism */
+    background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); 
     display: flex; justify-content: center; align-items: center; z-index: 1000;
     animation: fadeIn 0.3s ease;
 }
+
+.lock-card { background: var(--paper-bg); border-radius: 30px; padding: 30px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); text-align: center; }
 
 @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
