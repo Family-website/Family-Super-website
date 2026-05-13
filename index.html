@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="./style.css?v=phase3">
+    <link rel="stylesheet" href="./style.css?v=phase4">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -24,7 +24,7 @@
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 9999999; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <img src="./icon.png" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 15px; border: 3px solid white;">
         <h1 style="font-family: 'Caveat', cursive; font-size: 44px; color: #2563eb; font-weight: 700;">GharManager</h1>
-        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; color: #94a3b8; font-weight: 700;">Loading Phase 3... ⏳</p>
+        <p style="font-family: 'Nunito', sans-serif; font-size: 14px; color: #94a3b8; font-weight: 700;">Loading Phase 4... ⏳</p>
     </div>
 
     <div id="login-screen" class="lock-overlay" style="display: none;">
@@ -92,6 +92,16 @@
                             <p style="font-size: 12px; color: #4338ca; font-weight: bold; margin-bottom: 2px;">AI Prediction (Is Mahine)</p>
                             <h3 id="predicted-expense" style="color: #3730a3; font-size: 18px; font-weight: 800; margin: 0;">₹0 lagne ki umeed hai</h3>
                         </div>
+                    </div>
+                </div>
+
+                <div style="background: var(--paper-bg); border-radius: 20px; padding: 15px; margin: 0 20px 15px 20px; box-shadow: 0 8px 25px var(--shadow-color);">
+                    <p style="font-size: 12px; color: var(--text-muted); font-weight: 800; margin-bottom: 10px; text-transform: uppercase;">📅 Smart Expense Calendar</p>
+                    <div id="expense-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center;"></div>
+                    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-size: 10px; font-weight: bold;">
+                        <span style="color: #10b981;">🟢 Safe (Kam)</span>
+                        <span style="color: #f59e0b;">🟠 Med (Theek)</span>
+                        <span style="color: #ef4444;">🔴 High (Zyada)</span>
                     </div>
                 </div>
 
@@ -297,7 +307,7 @@
             <p id="profile-level-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 6px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">Level 1 | Beginner 🥉</p>
             
             <div style="background: #fdf4ff; border: 1.5px solid #d946ef; border-radius: 20px; padding: 15px; margin-bottom: 20px; text-align: left;">
-                <p style="font-size: 12px; color: #a21caf; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">🏆 30-Day No Junk Food Challenge</p>
+                <p style="font-size: 12px; color: #a21caf; font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">🏆 30-Day Savings Challenge</p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                     <span style="font-weight: 700; color: #701a75; font-size: 13px;">Progress: <span id="challenge-days">0</span>/30 Days</span>
                     <button onclick="progressChallenge()" style="background: #d946ef; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-weight: bold; font-size: 11px; cursor: pointer;">Mark Today ✅</button>
@@ -320,7 +330,9 @@
             </div>
 
             <div class="checklist-section" style="background: var(--line-color); border-radius: 20px; padding: 15px; margin-bottom: 20px;">
-                <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">📈 Expense Charts</p>
+                <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">📈 Expense Analytics</p>
+                <canvas id="trendChart"></canvas>
+                <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #cbd5e1;">
                 <canvas id="categoryChart"></canvas>
                 <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #cbd5e1;">
                 <canvas id="memberChart"></canvas>
@@ -381,7 +393,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./script.js?v=phase3"></script>
+    <script src="./script.js?v=phase4"></script>
 
     <script>
         setTimeout(() => {
