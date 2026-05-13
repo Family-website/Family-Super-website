@@ -113,6 +113,7 @@ function logout() {
 // ☁️ 3. CLOUD DATA SYNC & GLOBALS
 // ==========================================
 let familyExpenses = []; let dudhRecords = []; let rationItems = []; let investments = [];
+let activeLoans = []; // NAYA: EMI Portfolio ke liye
 let budgetLimit = 20000; 
 let customDisplayName = ""; 
 let monthlyIncome = 0; 
@@ -138,13 +139,14 @@ function loadCloudData(uid) {
                 dudhRecords = data.dudh || []; 
                 rationItems = data.ration || []; 
                 investments = data.investments || [];
+                activeLoans = data.loans || []; // Load Loans
                 budgetLimit = data.budget || 20000;
                 customDisplayName = data.displayName || ""; 
                 monthlyIncome = data.income || 0; 
                 userXP = data.xp || 0; 
                 challengeDays = data.challengeDays || 0; 
                 
-                updateHisabUI(); updateDudhUI(); updateRationUI(); updateInvestUI();
+                updateHisabUI(); updateDudhUI(); updateRationUI(); updateInvestUI(); updateLoanUI();
                 updateGreetingName(); updateChallengeUI();
             } else { updateHisabUI(); }
         }, (error) => { console.error("Cloud fetch failed:", error); });
@@ -156,6 +158,7 @@ async function saveToCloud() {
     try { 
         await db.collection('familyData').doc(currentUser.uid).set({ 
             expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, investments: investments,
+            loans: activeLoans, // Save Loans
             budget: budgetLimit, displayName: customDisplayName,
             income: monthlyIncome, xp: userXP, challengeDays: challengeDays
         }, { merge: true }); 
@@ -175,15 +178,29 @@ async function syncOldLocalData() {
 }
 
 // ==========================================
-// 🔔 3.2. SMART REMINDERS
+// 🔔 3.2. SMART REMINDERS (Updated for Loans)
 // ==========================================
 function checkSmartReminders() {
     let todayDate = new Date().getDate();
     let reminderShown = sessionStorage.getItem('reminderShownToday');
     if(!reminderShown) {
-        if(todayDate >= 1 && todayDate <= 5) {
-            Swal.fire({ title: '🔔 EMI Alert!', text: 'Mahaul tight hai! Mahine ke shuruat ke din hain, agar koi EMI ya kiraya baaki hai toh check kar lo!', icon: 'info', confirmButtonText: 'Theek Hai', confirmButtonColor: '#3b82f6' });
+        // Loan Reminders Check
+        let loanAlerts = [];
+        activeLoans.forEach(loan => {
+            if(loan.monthsPaid < loan.time) {
+                // Agar due date aaj se 2 din aage ya peeche hai
+                if(Math.abs(loan.dueDate - todayDate) <= 2) {
+                    loanAlerts.push(loan.name);
+                }
+            }
+        });
+
+        if(loanAlerts.length > 0) {
+            Swal.fire({ title: '🔔 EMI Alert!', text: `Mahaul tight hai! Tumhari "${loanAlerts.join(', ')}" ki EMI aane wali hai. Bank balance theek rakhna!`, icon: 'warning', confirmButtonText: 'Theek Hai', confirmButtonColor: '#3b82f6' });
+        } else if(todayDate >= 1 && todayDate <= 5) {
+            Swal.fire({ title: '🔔 Mahine ki shuruat!', text: 'Kiraya ya bills baaki hain toh clear kar lo!', icon: 'info', confirmButtonText: 'Theek Hai', confirmButtonColor: '#3b82f6' });
         }
+
         let lowStockCount = rationItems.filter(i => i.lowStock).length;
         if(lowStockCount >= 3) {
             setTimeout(() => { Swal.fire({ title: '🛒 Ration Khatam!', text: `Tumhare ${lowStockCount} ration items low stock par hain. Market jaane ka time aa gaya hai!`, icon: 'warning', confirmButtonColor: '#a855f7' }); }, 3000);
@@ -217,10 +234,7 @@ function gainXP(amount) {
 }
 
 function progressChallenge() {
-    if(challengeDays >= 30) {
-        Swal.fire('Wah Bhai Wah! 🎉', 'Tumne 30 din ka challenge poora kar liya! You are a Finance Ninja!', 'success');
-        return;
-    }
+    if(challengeDays >= 30) { Swal.fire('Wah Bhai Wah! 🎉', 'Tumne 30 din ka challenge poora kar liya! You are a Finance Ninja!', 'success'); return; }
     challengeDays += 1; gainXP(50); saveToCloud(); updateChallengeUI(); playSound('success');
     if(typeof confetti !== 'undefined') confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
 }
@@ -277,43 +291,24 @@ function updatePrediction(totalMonthExpense) {
     }
 }
 
-// ==========================================
-// 📅 4.5. SMART CALENDAR VIEW (PHASE 4)
-// ==========================================
 function renderCalendar(expenses, filterMonth) {
     const calEl = document.getElementById('expense-calendar'); if(!calEl) return;
     calEl.innerHTML = '';
     const year = parseInt(filterMonth.split('-')[0]); const month = parseInt(filterMonth.split('-')[1]) - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    // Header days
     const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-    days.forEach(d => { 
-        const el = document.createElement('div'); el.innerText = d; 
-        el.style.fontWeight = 'bold'; el.style.color = 'var(--text-muted)'; el.style.fontSize = '12px'; 
-        calEl.appendChild(el); 
-    });
-    
+    days.forEach(d => { const el = document.createElement('div'); el.innerText = d; el.style.fontWeight = 'bold'; el.style.color = 'var(--text-muted)'; el.style.fontSize = '12px'; calEl.appendChild(el); });
     let firstDay = new Date(year, month, 1).getDay();
     for(let i=0; i<firstDay; i++) calEl.appendChild(document.createElement('div'));
-    
     let dailyTotals = {};
-    expenses.forEach(exp => { 
-        let day = parseInt(exp.date.split('-')[2]); 
-        dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; 
-    });
-    
+    expenses.forEach(exp => { let day = parseInt(exp.date.split('-')[2]); dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; });
     for(let i=1; i<=daysInMonth; i++) {
-        const el = document.createElement('div'); el.innerText = i; 
-        el.style.padding = '6px 0'; el.style.borderRadius = '8px'; el.style.fontSize = '12px'; el.style.fontWeight = 'bold';
-        
+        const el = document.createElement('div'); el.innerText = i; el.style.padding = '6px 0'; el.style.borderRadius = '8px'; el.style.fontSize = '12px'; el.style.fontWeight = 'bold';
         if(dailyTotals[i]) {
-            if(dailyTotals[i] > 1000) { el.style.background = '#ef4444'; el.style.color = 'white'; } // High
-            else if(dailyTotals[i] > 300) { el.style.background = '#f59e0b'; el.style.color = 'white'; } // Med
-            else { el.style.background = '#10b981'; el.style.color = 'white'; } // Low
-        } else { 
-            el.style.background = 'var(--line-color)'; el.style.color = 'var(--text-main)'; 
-        }
+            if(dailyTotals[i] > 1000) { el.style.background = '#ef4444'; el.style.color = 'white'; } 
+            else if(dailyTotals[i] > 300) { el.style.background = '#f59e0b'; el.style.color = 'white'; } 
+            else { el.style.background = '#10b981'; el.style.color = 'white'; } 
+        } else { el.style.background = 'var(--line-color)'; el.style.color = 'var(--text-main)'; }
         calEl.appendChild(el);
     }
 }
@@ -329,14 +324,7 @@ const receiptInput = document.getElementById('receipt-img');
 if(receiptInput) {
     receiptInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                currentReceiptUrl = event.target.result;
-                const preview = document.getElementById('receipt-preview');
-                if(preview) { preview.src = currentReceiptUrl; preview.style.display = 'block'; }
-            }; reader.readAsDataURL(file);
-        }
+        if (file) { const reader = new FileReader(); reader.onload = function(event) { currentReceiptUrl = event.target.result; const preview = document.getElementById('receipt-preview'); if(preview) { preview.src = currentReceiptUrl; preview.style.display = 'block'; } }; reader.readAsDataURL(file); }
     });
 }
 
@@ -351,11 +339,8 @@ function updateHisabUI() {
     const budgetDisplay = document.getElementById('budget-display'); if(budgetDisplay) budgetDisplay.innerText = budgetLimit;
     const incomeDisplay = document.getElementById('total-income-display'); if(incomeDisplay) incomeDisplay.innerText = `₹${monthlyIncome}`;
 
-    const searchInput = document.getElementById('search-expense');
-    const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
-    
-    const familyFilterInput = document.getElementById('family-filter');
-    const familyQuery = familyFilterInput ? familyFilterInput.value : "All";
+    const searchInput = document.getElementById('search-expense'); const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
+    const familyFilterInput = document.getElementById('family-filter'); const familyQuery = familyFilterInput ? familyFilterInput.value : "All";
 
     const filteredExpenses = familyExpenses.filter(item => {
         const matchMonth = item.date && item.date.startsWith(filterMonth);
@@ -394,42 +379,15 @@ function updateHisabUI() {
         const warning = document.getElementById('budget-warning'); if(warning) warning.style.display = (budgetPercent >= 80) ? 'block' : 'none';
     }
     
-    updatePrediction(totalExpense); 
-    renderCalendar(filteredExpenses, filterMonth); // NAYA: Calendar Call
-    renderCategoryChart(categoryTotals); 
-    renderMemberChart(memberTotals);
-    renderTrendChart(filteredExpenses); // NAYA: Analytics Trend Chart Call
+    updatePrediction(totalExpense); renderCalendar(filteredExpenses, filterMonth); renderCategoryChart(categoryTotals); renderMemberChart(memberTotals); renderTrendChart(filteredExpenses);
 }
 
-// --- 📊 ADVANCED ANALYTICS CHARTS (PHASE 4) ---
 function renderTrendChart(expenses) {
-    const ctx = document.getElementById('trendChart'); if(!ctx) return; 
-    if(trendChartInstance) trendChartInstance.destroy();
-    
-    let dailyTotals = {};
-    expenses.forEach(exp => { 
-        let day = exp.date.split('-')[2]; 
-        dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; 
-    });
-    
-    const labels = Object.keys(dailyTotals).sort((a,b) => parseInt(a) - parseInt(b));
-    const data = labels.map(day => dailyTotals[day]);
-    const textColor = isDarkMode ? '#fff' : '#333';
-    
-    trendChartInstance = new Chart(ctx.getContext('2d'), { 
-        type: 'bar', 
-        data: { 
-            labels: labels.map(l => l + ' Date'), 
-            datasets: [{ label: 'Daily Spend (₹)', data: data, backgroundColor: '#8b5cf6', borderRadius: 6 }] 
-        }, 
-        options: { 
-            responsive: true, 
-            plugins: { legend: { labels: { color: textColor } } }, 
-            scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } } 
-        } 
-    });
+    const ctx = document.getElementById('trendChart'); if(!ctx) return; if(trendChartInstance) trendChartInstance.destroy();
+    let dailyTotals = {}; expenses.forEach(exp => { let day = exp.date.split('-')[2]; dailyTotals[day] = (dailyTotals[day] || 0) + exp.amount; });
+    const labels = Object.keys(dailyTotals).sort((a,b) => parseInt(a) - parseInt(b)); const data = labels.map(day => dailyTotals[day]); const textColor = isDarkMode ? '#fff' : '#333';
+    trendChartInstance = new Chart(ctx.getContext('2d'), { type: 'bar', data: { labels: labels.map(l => l + ' Date'), datasets: [{ label: 'Daily Spend (₹)', data: data, backgroundColor: '#8b5cf6', borderRadius: 6 }] }, options: { responsive: true, plugins: { legend: { labels: { color: textColor } } }, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor } } } } });
 }
-
 function renderCategoryChart(dataObj) {
     const ctx = document.getElementById('categoryChart'); if(!ctx) return; if(categoryChartInstance) categoryChartInstance.destroy(); 
     const labels = Object.keys(dataObj); const data = Object.values(dataObj); const hasData = data.some(val => val > 0); const textColor = isDarkMode ? '#fff' : '#333';
@@ -445,147 +403,123 @@ function addExpense() {
     const member = document.getElementById('member-name').value; const category = document.getElementById('expense-category').value; const desc = document.getElementById('description').value; const amt = parseFloat(document.getElementById('amount').value); const date = document.getElementById('date').value;
     if (!desc || isNaN(amt) || amt <= 0 || !date) return Swal.fire('Oops...', 'Sahi details bhariye!', 'warning');
     const newRecord = { member, category, description: desc, amount: amt, date, receipt: currentReceiptUrl };
-
-    if(editExpenseIndex === -1) {
-        familyExpenses.push(newRecord); 
-        gainXP(10); 
-        playSound('success');
-        if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
-    } else {
-        familyExpenses[editExpenseIndex] = newRecord; editExpenseIndex = -1; document.getElementById('btn-add-expense').innerText = "Kharcha Add Karein"; Swal.fire('Updated!', 'Update ho gaya.', 'success');
-    }
+    if(editExpenseIndex === -1) { familyExpenses.push(newRecord); gainXP(10); playSound('success'); if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); } 
+    else { familyExpenses[editExpenseIndex] = newRecord; editExpenseIndex = -1; document.getElementById('btn-add-expense').innerText = "Kharcha Add Karein"; Swal.fire('Updated!', 'Update ho gaya.', 'success'); }
     saveToCloud(); document.getElementById('description').value = ''; document.getElementById('amount').value = ''; currentReceiptUrl = ""; 
     const preview = document.getElementById('receipt-preview'); if(preview) preview.style.display = 'none'; if(receiptInput) receiptInput.value = ""; renderHistoryWithSkeleton();
 }
 
-function editExpense(index) {
-    const item = familyExpenses[index]; document.getElementById('member-name').value = item.member || 'Aditya'; document.getElementById('expense-category').value = item.category || 'Other'; document.getElementById('description').value = item.description; document.getElementById('amount').value = item.amount; document.getElementById('date').value = item.date; editExpenseIndex = index; document.getElementById('btn-add-expense').innerText = "Update Kharcha ✏️"; window.scrollTo({ top: 0, behavior: 'smooth' }); 
-}
-
+function editExpense(index) { const item = familyExpenses[index]; document.getElementById('member-name').value = item.member || 'Aditya'; document.getElementById('expense-category').value = item.category || 'Other'; document.getElementById('description').value = item.description; document.getElementById('amount').value = item.amount; document.getElementById('date').value = item.date; editExpenseIndex = index; document.getElementById('btn-add-expense').innerText = "Update Kharcha ✏️"; window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function deleteExpense(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Haan!' }).then((result) => { if (result.isConfirmed) { familyExpenses.splice(index, 1); saveToCloud(); renderHistoryWithSkeleton(); } }); }
 
 // ==========================================
-// 📈 5.5. INVESTMENT TRACKER
+// 🏦 6. THE DEBT MANAGER (ACTIVE EMI SYSTEM - PHASE 5)
 // ==========================================
-const investDateInput = document.getElementById('invest-date'); 
-if(investDateInput) investDateInput.value = todayDateString;
+let tempLoanData = null;
 
-function updateInvestUI() {
-    const list = document.getElementById('invest-list'); if(!list) return; list.innerHTML = ''; let totalInvest = 0;
-    investments.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((item, index) => {
-        totalInvest += item.amount; const li = document.createElement('li'); li.style.borderLeft = "4px solid #06b6d4";
-        li.innerHTML = `<div class="list-left"><strong style="font-size:16px;">${item.type}</strong><span style="font-size:12px; color:#64748b; font-weight:bold;">📅 ${item.date}</span></div><div class="list-right"><span style="font-weight:800; color:#0891b2; font-size:18px; margin-right:10px;">₹${item.amount}</span><button class="action-btn delete" onclick="deleteInvestment(${index})">🗑️</button></div>`;
-        list.appendChild(li);
-    });
-    const totalEl = document.getElementById('invest-total-amount'); if(totalEl) totalEl.innerText = `₹${totalInvest}`;
-}
-
-function addInvestment() {
-    const type = document.getElementById('invest-type').value; const amt = parseFloat(document.getElementById('invest-amount').value); const date = document.getElementById('invest-date').value;
-    if (isNaN(amt) || amt <= 0 || !date) return Swal.fire('Oops...', 'Sahi amount daalein!', 'warning');
-    investments.push({ type, amount: amt, date }); saveToCloud(); updateInvestUI(); gainXP(20); 
-    document.getElementById('invest-amount').value = ''; playSound('success'); Swal.fire('Great!', 'Investment add ho gaya! Future secure 🚀', 'success');
-}
-
-function deleteInvestment(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true }).then((result) => { if (result.isConfirmed) { investments.splice(index, 1); saveToCloud(); updateInvestUI(); } }); }
-
-// ==========================================
-// 🛒 6. RATION LOGIC
-// ==========================================
-const rationDateInput = document.getElementById('ration-date'); if(rationDateInput) rationDateInput.value = todayDateString;
-
-function updateRationUI() {
-    const list = document.getElementById('ration-list'); if(!list) return; list.innerHTML = '';
-    rationItems.sort((a, b) => new Date(b.date) - new Date(a.date)); const uniqueDates = [...new Set(rationItems.map(item => item.date))];
-    uniqueDates.forEach(dateStr => {
-        const parts = dateStr.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const dateHeader = document.createElement('div'); dateHeader.className = 'date-header'; dateHeader.style.fontWeight = 'bold'; dateHeader.style.color = '#c084fc'; dateHeader.style.margin = '10px 0 5px 0'; dateHeader.innerText = `🛒 ${showDate}`; list.appendChild(dateHeader);
-        
-        rationItems.forEach((item, index) => {
-            if(item.date === dateStr) {
-                const li = document.createElement('li'); 
-                li.style.borderLeft = item.lowStock ? "4px solid #ef4444" : "4px solid #8e44ad";
-                li.style.background = item.lowStock ? "#fef2f2" : "var(--line-color)"; 
-                
-                li.innerHTML = `
-                <div class="list-left ration-item" onclick="toggleRation(${index})" style="flex-direction: row; align-items:center; cursor:pointer; opacity: ${item.bought ? '0.5' : '1'}; flex: 2;">
-                    <input type="checkbox" ${item.bought ? 'checked' : ''} style="width: 20px; height: 20px; margin-right:10px;">
-                    <div style="display:flex; flex-direction:column;">
-                        <strong style="font-size: 16px; text-decoration: ${item.bought ? 'line-through' : 'none'}; color: ${item.lowStock ? '#ef4444' : 'var(--text-main)'}">${item.name}</strong>
-                        ${item.amount > 0 ? `<span style="font-size:12px; color:#64748b; font-weight:bold;">₹${item.amount}</span>` : ''}
-                    </div>
-                </div>
-                <div class="list-right" style="flex: 1; justify-content: flex-end;">
-                    <button class="action-btn" onclick="toggleLowStock(${index})" style="background: ${item.lowStock ? '#ef4444' : '#f1f5f9'}; color: ${item.lowStock ? 'white' : 'black'}; font-size:12px; font-weight:bold; width: 60px;">${item.lowStock ? '⚠️ Low' : 'Stock OK'}</button>
-                    <button class="action-btn delete" onclick="deleteRation(${index})">🗑️</button>
-                </div>`;
-                list.appendChild(li);
-            }
-        });
-    });
-}
-
-function addRation() { 
-    const name = document.getElementById('ration-item').value; const rDate = document.getElementById('ration-date').value; const amount = parseFloat(document.getElementById('ration-amount').value) || 0;
-    if(!name || !rDate) return Swal.fire('Galti', 'Samaan ka naam likhein!', 'warning'); 
-    rationItems.push({ name: name, bought: false, date: rDate, amount: amount, lowStock: false }); saveToCloud(); document.getElementById('ration-item').value = ''; document.getElementById('ration-amount').value = ''; updateRationUI(); 
-}
-
-async function toggleRation(index) { 
-    const item = rationItems[index]; item.bought = !item.bought; 
-    playSound('click');
-    if (item.bought && item.amount > 0) {
-        const autoExpense = { member: "Aditya", category: "Ration", description: `🛒 ${item.name} (Ration)`, amount: item.amount, date: todayDateString, receipt: "" };
-        familyExpenses.push(autoExpense);
-        gainXP(5); 
-        playSound('success');
-        Swal.fire({ title: 'Hisaab mein juda!', text: `${item.name} ka ₹${item.amount} 'GharManager' mein add ho gaya hai. ✅`, icon: 'success', timer: 2000, showConfirmButton: false });
-    }
-    await saveToCloud(); updateRationUI(); updateHisabUI();
-}
-
-function toggleLowStock(index) { rationItems[index].lowStock = !rationItems[index].lowStock; playSound('click'); saveToCloud(); updateRationUI(); }
-function deleteRation(index) { rationItems.splice(index, 1); saveToCloud(); updateRationUI(); }
-
-// ==========================================
-// 🥛 7. DUDH SECTION
-// ==========================================
-let editDudhIndex = -1;
-const dudhDateInput = document.getElementById('dudh-date'); if(dudhDateInput) dudhDateInput.value = todayDateString;
-
-function updateDudhUI() {
-    const list = document.getElementById('dudh-list'); if(!list) return; list.innerHTML = ''; let totalLiter = 0, totalBill = 0;
-    dudhRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-    dudhRecords.forEach((record, index) => {
-        const totalDayLiter = record.morning + record.evening; const dayCost = totalDayLiter * record.rate; totalLiter += totalDayLiter; totalBill += dayCost;
-        const parts = record.date.split('-'); const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); const showDate = `${dateObj.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dateObj.getMonth()]}`;
-        const li = document.createElement('li'); 
-        li.innerHTML = `<div class="list-left"><div style="display:flex; align-items:center; margin-bottom:6px;"><span class="member-badge" style="background:#bfdbfe; color:#2563eb;">📅 ${showDate}</span><strong style="font-size:15px;">S: ${record.morning}L | Sh: ${record.evening}L</strong></div><div style="font-size:12px; color:#64748b; font-weight:600;">Rate: ₹${record.rate}/L | Total: ${totalDayLiter}L</div></div><div class="list-right"><span style="font-weight:800; color:#2563eb; font-size:19px; margin-right:5px;">₹${dayCost}</span><button class="action-btn edit" onclick="editDudh(${index})">✏️</button><button class="action-btn delete" onclick="deleteDudh(${index})">🗑️</button></div>`;
-        list.appendChild(li);
-    });
-    document.getElementById('dudh-total-liter').innerText = totalLiter.toFixed(2); document.getElementById('dudh-total-bill').innerText = `₹${Math.round(totalBill)}`;
-}
-
-function addDudh() {
-    const dDate = document.getElementById('dudh-date').value; const rate = parseFloat(document.getElementById('dudh-rate').value); const morn = parseFloat(document.getElementById('dudh-morning').value) || 0; const eve = parseFloat(document.getElementById('dudh-evening').value) || 0;
-    if (!dDate || isNaN(rate) || (morn === 0 && eve === 0)) return Swal.fire('Galti', 'Sahi details daaliye!', 'error');
-    if(editDudhIndex === -1) { dudhRecords.push({ date: dDate, rate: rate, morning: morn, evening: eve }); playSound('success'); } 
-    else { dudhRecords[editDudhIndex] = { date: dDate, rate: rate, morning: morn, evening: eve }; editDudhIndex = -1; document.getElementById('btn-add-dudh').innerText = "Dudh Add Karein"; }
-    saveToCloud(); updateDudhUI(); document.getElementById('dudh-morning').value = ''; document.getElementById('dudh-evening').value = '';
-}
-function editDudh(index) { const item = dudhRecords[index]; document.getElementById('dudh-date').value = item.date; document.getElementById('dudh-rate').value = item.rate; document.getElementById('dudh-morning').value = item.morning; document.getElementById('dudh-evening').value = item.evening; editDudhIndex = index; document.getElementById('btn-add-dudh').innerText = "Update Dudh ✏️"; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-function deleteDudh(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true }).then((result) => { if (result.isConfirmed) { dudhRecords.splice(index, 1); saveToCloud(); updateDudhUI(); } }); }
-
-// ==========================================
-// 🏦 8. EMI AND VYAJ LOGIC
-// ==========================================
 function calculateEMI() {
-    const p = parseFloat(document.getElementById('emi-principal').value); const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100; const n = parseFloat(document.getElementById('emi-time').value);
+    const name = document.getElementById('emi-name').value || 'My Loan';
+    const p = parseFloat(document.getElementById('emi-principal').value); 
+    const r = parseFloat(document.getElementById('emi-rate').value) / 12 / 100; 
+    const n = parseFloat(document.getElementById('emi-time').value);
+    const dueDate = parseInt(document.getElementById('emi-due-date').value) || 5;
+
     if (isNaN(p) || isNaN(r) || isNaN(n) || p <= 0 || n <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
-    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); const totalAmount = emi * n;
-    document.getElementById('emi-result').style.display = 'block'; document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; 
+    
+    const emi = (p * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1); 
+    const totalAmount = emi * n;
+    const totalInterest = totalAmount - p;
+
+    tempLoanData = { name: name, principal: p, rate: document.getElementById('emi-rate').value, time: n, emi: Math.round(emi), totalInterest: Math.round(totalInterest), dueDate: dueDate, monthsPaid: 0 };
+
+    document.getElementById('emi-result').style.display = 'block'; 
+    document.getElementById('emi-amount').innerText = `₹${Math.round(emi)}`; 
+    
+    // Break Down UI
+    document.getElementById('emi-break-principal').innerText = Math.round(p);
+    document.getElementById('emi-break-interest').innerText = Math.round(totalInterest);
+    let pPercent = (p / totalAmount) * 100;
+    document.getElementById('emi-break-bar').style.width = `${pPercent}%`;
+
     playSound('click');
 }
+
+function saveLoan() {
+    if(!tempLoanData) return;
+    activeLoans.push(tempLoanData);
+    saveToCloud(); updateLoanUI(); tempLoanData = null;
+    Swal.fire('Saved! 🏦', 'Yeh loan list me add ho gaya hai.', 'success');
+    document.getElementById('emi-result').style.display = 'none';
+    
+    // Clear inputs
+    document.getElementById('emi-name').value = ''; document.getElementById('emi-principal').value = '';
+    document.getElementById('emi-rate').value = ''; document.getElementById('emi-time').value = '';
+}
+
+function updateLoanUI() {
+    const list = document.getElementById('loan-list'); if(!list) return; list.innerHTML = '';
+    
+    activeLoans.forEach((loan, index) => {
+        let percentPaid = (loan.monthsPaid / loan.time) * 100;
+        let isComplete = loan.monthsPaid >= loan.time;
+        
+        const li = document.createElement('li'); 
+        li.style.flexDirection = 'column'; li.style.alignItems = 'stretch'; li.style.borderLeft = isComplete ? "4px solid #10b981" : "4px solid #f472b6";
+        
+        li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; flex-direction: column;">
+                    <strong style="font-size: 16px;">${loan.name}</strong>
+                    <span style="font-size: 11px; color: #64748b;">Due: Every ${loan.dueDate}th | EMI: ₹${loan.emi}</span>
+                </div>
+                <button class="action-btn delete" onclick="deleteLoan(${index})">🗑️</button>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
+                <span>Paid: ${loan.monthsPaid}/${loan.time} Mnth</span>
+                <span style="color: ${isComplete ? '#10b981' : '#f59e0b'}">${isComplete ? 'Loan Clear! 🎉' : Math.round(percentPaid)+'% Done'}</span>
+            </div>
+            <div style="width:100%; background: var(--line-color); border-radius:10px; height:6px; overflow:hidden; margin-bottom: 10px;">
+                <div style="height:100%; width:${percentPaid}%; background: ${isComplete ? '#10b981' : '#f472b6'}; transition: width 0.5s;"></div>
+            </div>
+            
+            ${!isComplete ? `<button onclick="payEMI(${index})" style="background: #ec4899; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer;">1-Click Pay ₹${loan.emi} ✅</button>` : ''}
+        `;
+        list.appendChild(li);
+    });
+}
+
+function payEMI(index) {
+    let loan = activeLoans[index];
+    if(loan.monthsPaid >= loan.time) return;
+
+    Swal.fire({ title: 'Pay EMI?', text: `Kya tum ${loan.name} ka ₹${loan.emi} Hisaab me add karna chahte ho?`, icon: 'question', showCancelButton: true, confirmButtonText: 'Haan, Pay Karo' }).then(async (result) => {
+        if (result.isConfirmed) {
+            // Hisaab me add
+            const autoExpense = { member: "Aditya", category: "Bills", description: `🏦 EMI Paid: ${loan.name}`, amount: loan.emi, date: todayDateString, receipt: "" };
+            familyExpenses.push(autoExpense);
+            
+            // Loan progress
+            loan.monthsPaid += 1;
+            gainXP(20); 
+            playSound('success');
+            
+            if(loan.monthsPaid >= loan.time) {
+                if(typeof confetti !== 'undefined') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                Swal.fire('Mubarak Ho! 🎉', `Tumhara "${loan.name}" poori tarah se chukta ho gaya hai!`, 'success');
+            } else {
+                Swal.fire('EMI Paid ✅', 'Hisaab mein add ho gaya hai.', 'success');
+            }
+            await saveToCloud(); updateLoanUI(); updateHisabUI();
+        }
+    });
+}
+
+function deleteLoan(index) { Swal.fire({ title: 'Delete Loan?', icon: 'warning', showCancelButton: true }).then((result) => { if (result.isConfirmed) { activeLoans.splice(index, 1); saveToCloud(); updateLoanUI(); } }); }
+
+// ==========================================
+// 💸 7. VYAJ CALCULATOR
+// ==========================================
 function calculateVyaj() {
     const p = parseFloat(document.getElementById('vyaj-principal').value); const rate = parseFloat(document.getElementById('vyaj-rate').value); const time = parseFloat(document.getElementById('vyaj-time').value);
     if (isNaN(p) || isNaN(rate) || isNaN(time) || p <= 0 || time <= 0) return Swal.fire('Galti', 'Sahi details bhariye!', 'error');
@@ -595,25 +529,25 @@ function calculateVyaj() {
 }
 
 // ==========================================
-// 💾 9. BACKUP & RESTORE SYSTEM
+// 💾 8. BACKUP & RESTORE SYSTEM
 // ==========================================
-function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, investments: investments, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "GharManager_Cloud_Backup.json"); dlAnchorElem.click(); }
+function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, investments: investments, loans: activeLoans, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "GharManager_Cloud_Backup.json"); dlAnchorElem.click(); }
 function restoreData(event) {
     const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
     reader.onload = async function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (data.expenses || data.dudh || data.ration || data.investments) {
-                familyExpenses = data.expenses || []; dudhRecords = data.dudh || []; rationItems = data.ration || []; investments = data.investments || []; budgetLimit = data.budget || 20000;
+            if (data.expenses || data.dudh) {
+                familyExpenses = data.expenses || []; dudhRecords = data.dudh || []; rationItems = data.ration || []; investments = data.investments || []; activeLoans = data.loans || []; budgetLimit = data.budget || 20000;
                 await saveToCloud(); Swal.fire('Restored!', 'Aapka purana data wapas aa gaya hai! ✅', 'success');
-                renderHistoryWithSkeleton(); updateDudhUI(); updateRationUI(); updateInvestUI();
+                renderHistoryWithSkeleton(); updateDudhUI(); updateRationUI(); updateInvestUI(); updateLoanUI();
             } else { Swal.fire('Error', 'Yeh file sahi format mein nahi hai!', 'error'); }
         } catch(err) { Swal.fire('Error', 'File read nahi ho paayi.', 'error'); }
     }; reader.readAsText(file);
 }
 
 // ==========================================
-// 📤 10. SHARE PDF REPORT SYSTEM 
+// 📤 9. SHARE PDF REPORT SYSTEM 
 // ==========================================
 async function shareReport() {
     if(!window.jspdf) return Swal.fire('Wait', 'PDF library load ho rahi hai.', 'info');
@@ -631,7 +565,7 @@ async function shareReport() {
 function exportToPDF() { shareReport(); }
 
 // ==========================================
-// 🎙️ 11. VOICE TYPING (JADU!)
+// 🎙️ 10. VOICE TYPING (JADU!)
 // ==========================================
 function startVoice() {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)(); recognition.lang = 'hi-IN'; const btn = document.getElementById('mic-btn'); btn.innerText = "🛑";
@@ -640,106 +574,45 @@ function startVoice() {
 }
 
 // ==========================================
-// 👤 12. USER PROFILE SYSTEM 
+// 👤 11. USER PROFILE SYSTEM 
 // ==========================================
 function openProfile() {
     const modal = document.getElementById('profile-modal'); if(!modal) return;
-    if (currentUser) {
-        document.getElementById('profile-email').innerText = currentUser.email;
-        updateGreetingName(); 
-    }
-    
+    if (currentUser) { document.getElementById('profile-email').innerText = currentUser.email; updateGreetingName(); }
     const lvlBadge = document.getElementById('profile-level-badge');
-    if(lvlBadge) {
-        let level = Math.floor(userXP / 100) + 1;
-        let title = level < 3 ? "Beginner 🥉" : level < 6 ? "Pro Saver 🥈" : "Finance Ninja 🥇";
-        lvlBadge.innerText = `Level ${level} | ${title} (XP: ${userXP})`;
-    }
-
+    if(lvlBadge) { let level = Math.floor(userXP / 100) + 1; let title = level < 3 ? "Beginner 🥉" : level < 6 ? "Pro Saver 🥈" : "Finance Ninja 🥇"; lvlBadge.innerText = `Level ${level} | ${title} (XP: ${userXP})`; }
     let totalExpAllTime = familyExpenses.reduce((sum, item) => sum + item.amount, 0); document.getElementById('profile-total-expense').innerText = `₹${totalExpAllTime}`;
     let totalDudhAllTime = dudhRecords.reduce((sum, item) => sum + ((item.morning + item.evening) * item.rate), 0); document.getElementById('profile-total-dudh').innerText = `₹${Math.round(totalDudhAllTime)}`;
-    
     modal.style.display = 'flex'; playSound('click');
 }
-
 function closeProfile() { document.getElementById('profile-modal').style.display = 'none'; playSound('click'); }
 
 // ==========================================
-// 🤖 13. LOCAL AI FINANCIAL ASSISTANT
+// 🤖 12. LOCAL AI FINANCIAL ASSISTANT
 // ==========================================
 function askFinanceAI() {
     if(familyExpenses.length === 0) return Swal.fire('🤖 AI', 'Bhai, pehle kuch kharcha toh add karo, tabhi toh hisaab bataunga!', 'info');
-    
     let catTotals = {}; let maxCat = ""; let maxAmt = 0;
-    familyExpenses.forEach(exp => {
-        catTotals[exp.category] = (catTotals[exp.category] || 0) + exp.amount;
-        if(catTotals[exp.category] > maxAmt) { maxAmt = catTotals[exp.category]; maxCat = exp.category; }
-    });
-
+    familyExpenses.forEach(exp => { catTotals[exp.category] = (catTotals[exp.category] || 0) + exp.amount; if(catTotals[exp.category] > maxAmt) { maxAmt = catTotals[exp.category]; maxCat = exp.category; } });
     let filterMonth = document.getElementById('month-filter') ? document.getElementById('month-filter').value : todayDateString.slice(0,7);
     let monthExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
     let totalExpMonth = monthExpenses.reduce((sum, item) => sum + item.amount, 0);
-    
     let savings = monthlyIncome - totalExpMonth;
-    let savingsMsg = savings > 0 
-        ? `<span style="color:#16a34a; font-weight:bold;">Badiya! Tumne is mahine ₹${savings} bacha liye hain. 🤑</span>` 
-        : `<span style="color:#e74c3c; font-weight:bold;">Alert! Tumhari kamai se zyada kharcha (₹${Math.abs(savings)} extra) ho raha hai! 📉</span>`;
-
-    Swal.fire({
-        title: '🤖 AI Finance Tips',
-        html: `
-            <div style="text-align: left; font-size: 14px; line-height: 1.6;">
-                <p>📊 <b>Top Kharcha:</b> Sabse zyada paisa <b>${maxCat} (₹${maxAmt})</b> mein gaya hai. Thoda control karo!</p>
-                <hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;">
-                <p>💰 <b>Savings:</b> ${savingsMsg}</p>
-                <hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;">
-                <p>💡 <b>AI Tip:</b> "Rule of 50-30-20 yaad rakho. 50% zaroorat, 30% shauk, aur 20% future ke liye save karo."</p>
-            </div>
-        `,
-        icon: 'info',
-        confirmButtonText: 'Thanks AI! 👍',
-        confirmButtonColor: '#6366f1'
-    });
+    let savingsMsg = savings > 0 ? `<span style="color:#16a34a; font-weight:bold;">Badiya! Tumne is mahine ₹${savings} bacha liye hain. 🤑</span>` : `<span style="color:#e74c3c; font-weight:bold;">Alert! Tumhari kamai se zyada kharcha (₹${Math.abs(savings)} extra) ho raha hai! 📉</span>`;
+    Swal.fire({ title: '🤖 AI Finance Tips', html: `<div style="text-align: left; font-size: 14px; line-height: 1.6;"><p>📊 <b>Top Kharcha:</b> Sabse zyada paisa <b>${maxCat} (₹${maxAmt})</b> mein gaya hai. Thoda control karo!</p><hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;"><p>💰 <b>Savings:</b> ${savingsMsg}</p><hr style="margin: 10px 0; border: 0.5px dashed #cbd5e1;"><p>💡 <b>AI Tip:</b> "Rule of 50-30-20 yaad rakho. 50% zaroorat, 30% shauk, aur 20% future ke liye save karo."</p></div>`, icon: 'info', confirmButtonText: 'Thanks AI! 👍', confirmButtonColor: '#6366f1' });
 }
 
 // ==========================================
-// 🎨 14. THEME STORE SYSTEM
+// 🎨 13. THEME STORE SYSTEM
 // ==========================================
 function openThemeStore() { closeProfile(); document.getElementById('theme-modal').style.display = 'flex'; playSound('click'); }
 function closeThemeStore() { document.getElementById('theme-modal').style.display = 'none'; playSound('click'); }
-
-function applyTheme(themeName) {
-    document.body.setAttribute('data-theme', themeName); localStorage.setItem('appTheme', themeName); closeThemeStore();
-    Swal.fire({ title: 'Theme Applied! 🎨', text: 'Naya rang set ho gaya hai!', icon: 'success', timer: 1500, showConfirmButton: false });
-    if(typeof confetti !== 'undefined') confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } }); playSound('success');
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    let savedAppTheme = localStorage.getItem('appTheme'); if(savedAppTheme) document.body.setAttribute('data-theme', savedAppTheme);
-    updateSoundUI();
-    autoDarkMode(); 
-});
+function applyTheme(themeName) { document.body.setAttribute('data-theme', themeName); localStorage.setItem('appTheme', themeName); closeThemeStore(); Swal.fire({ title: 'Theme Applied! 🎨', text: 'Naya rang set ho gaya hai!', icon: 'success', timer: 1500, showConfirmButton: false }); if(typeof confetti !== 'undefined') confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } }); playSound('success'); }
+window.addEventListener('DOMContentLoaded', () => { let savedAppTheme = localStorage.getItem('appTheme'); if(savedAppTheme) document.body.setAttribute('data-theme', savedAppTheme); updateSoundUI(); autoDarkMode(); });
 
 // ==========================================
-// 📲 15. PWA INSTALL & SERVICE WORKER LOGIC
+// 📲 14. PWA INSTALL LOGIC
 // ==========================================
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
-
-function installApp() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') { Swal.fire('Mubarak Ho! 🎉', 'GharManager phone mein install ho gaya hai!', 'success'); }
-            deferredPrompt = null;
-        });
-    } else {
-        Swal.fire({ title: 'Install Kaise Karein?', text: 'Bhai, upar Right corner mein 3-dots (⋮) par click karo aur wahan se "Add to Home screen" daba do!', icon: 'info', confirmButtonText: 'Theek hai 👍' });
-    }
-}
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => console.log('✅ Service Worker Active!')).catch(err => console.error('❌ Service Worker Error', err));
-    });
-}
+let deferredPrompt; window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
+function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then((choiceResult) => { if (choiceResult.outcome === 'accepted') { Swal.fire('Mubarak Ho! 🎉', 'GharManager phone mein install ho gaya hai!', 'success'); } deferredPrompt = null; }); } else { Swal.fire({ title: 'Install Kaise Karein?', text: 'Bhai, upar Right corner mein 3-dots (⋮) par click karo aur wahan se "Add to Home screen" daba do!', icon: 'info', confirmButtonText: 'Theek hai 👍' }); } }
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => console.log('✅ SW Active!')).catch(err => console.error('❌ SW Error', err)); }); }
