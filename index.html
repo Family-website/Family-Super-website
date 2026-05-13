@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="./style.css?v=megaupdate">
+    <link rel="stylesheet" href="./style.css?v=phase2">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -57,6 +57,7 @@
                     <div>
                         <p id="smart-greeting" style="font-size: 13px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Hello! ✨</p>
                         <h2 id="app-title" style="margin: 0; font-family: 'Caveat', cursive !important; font-size: 34px !important; color: var(--ink-blue); line-height: 1; transition: 0.3s;">GharManager</h2>
+                        <p id="sync-status" style="font-size: 11px; color: #10b981; font-weight: 800; margin-top: 4px; transition: 0.3s;">☁️ Synced Just Now</p>
                     </div>
                 </div>
             </div>
@@ -87,6 +88,16 @@
                         <h2 id="total-income-display" style="color: #15803d; font-size: 22px; font-weight: 800;">₹0</h2>
                     </div>
                     <button type="button" onclick="setIncome()" style="background: #16a34a; color: white; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);">+ Add</button>
+                </div>
+
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid #6366f1; padding: 15px; border-radius: 20px; margin: 0 20px 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span class="anim-premium-icon" style="font-size: 28px;">🔮</span>
+                        <div>
+                            <p style="font-size: 12px; color: #4338ca; font-weight: bold; margin-bottom: 2px;">AI Prediction (Is Mahine)</p>
+                            <h3 id="predicted-expense" style="color: #3730a3; font-size: 18px; font-weight: 800; margin: 0;">₹0 lagne ki umeed hai</h3>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="margin: 0 20px 15px 20px;">
@@ -220,23 +231,52 @@
                 </div>
             </div>
 
+            <div id="section-invest" class="app-section">
+                <div class="balance-card" style="background: #cffafe;">
+                    <p style="color: #0891b2;">Total Investments (SIP/FD/Gold)</p>
+                    <h1 id="invest-total-amount" style="color: #0e7490;">₹0</h1>
+                </div>
+                <div class="form-section">
+                    <label>Kahan Invest Kiya?</label>
+                    <select id="invest-type">
+                        <option value="SIP">📈 Mutual Fund (SIP)</option>
+                        <option value="FD">🏦 Bank FD / RD</option>
+                        <option value="Stock">📊 Stocks / Share Market</option>
+                        <option value="Gold">🪙 Gold / Silver</option>
+                        <option value="Crypto">₿ Crypto</option>
+                    </select>
+                    <label>Kitne paise lagaye?</label>
+                    <input type="number" id="invest-amount" placeholder="Amount (₹)">
+                    <label>Date</label>
+                    <input type="date" id="invest-date">
+                    <button type="button" class="expense-btn" style="background:#06b6d4; border:none;" onclick="addInvestment()">Invest Add Karein</button>
+                </div>
+                <div class="history-section">
+                    <h3>Investment Portfolio</h3>
+                    <ul id="invest-list"></ul>
+                </div>
+            </div>
+
         </div>
 
-        <div class="bottom-nav">
+        <div class="bottom-nav" style="padding: 10px 2px 15px 2px;">
             <button type="button" class="nav-btn active-nav" onclick="openSection('hisab', 'GharManager 🏠')">
-                <i style="font-style: normal; font-size: 20px;">💰</i><span>HISAB</span>
+                <i style="font-style: normal; font-size: 18px;">💰</i><span style="font-size: 10px !important;">HISAB</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('emi', 'EMI Calculator 🏦')">
-                <i style="font-style: normal; font-size: 20px;">🏦</i><span>EMI</span>
+            <button type="button" class="nav-btn" onclick="openSection('invest', 'Investments 📈')">
+                <i style="font-style: normal; font-size: 18px;">📈</i><span style="font-size: 10px !important;">INVEST</span>
             </button>
-            <button type="button" class="nav-btn" onclick="openSection('vyaj', 'Gaon Ka Vyaj ₹')">
-                <i style="font-style: normal; font-size: 20px;">₹</i><span>VYAJ</span>
+            <button type="button" class="nav-btn" onclick="openSection('emi', 'EMI Calc 🏦')">
+                <i style="font-style: normal; font-size: 18px;">🏦</i><span style="font-size: 10px !important;">EMI</span>
+            </button>
+            <button type="button" class="nav-btn" onclick="openSection('vyaj', 'Gaon Vyaj ₹')">
+                <i style="font-style: normal; font-size: 18px;">₹</i><span style="font-size: 10px !important;">VYAJ</span>
             </button>
             <button type="button" class="nav-btn" onclick="openSection('dudh', 'MILK 🥛')">
-                <i style="font-style: normal; font-size: 20px;">🥛</i><span>MILK</span>
+                <i style="font-style: normal; font-size: 18px;">🥛</i><span style="font-size: 10px !important;">MILK</span>
             </button>
             <button type="button" class="nav-btn" onclick="openSection('ration', 'RATION 🛒')">
-                <i style="font-style: normal; font-size: 20px;">🛒</i><span>RATION</span>
+                <i style="font-style: normal; font-size: 18px;">🛒</i><span style="font-size: 10px !important;">RATION</span>
             </button>
         </div>
     </div>
@@ -283,12 +323,10 @@
 
             <div style="background: var(--line-color); border-radius: 20px; padding: 15px; margin-bottom: 20px;">
                 <p style="font-size: 12px; color: #64748b; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: left;">💾 Data & Reports</p>
-                
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <button type="button" onclick="exportToPDF()" style="flex:1; padding:10px; background:white; color:#e74c3c; border:1.5px solid #e74c3c; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📄 Save PDF</button>
                     <button type="button" onclick="shareReport()" style="flex:1; padding:10px; background:#25D366; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold; font-size:13px;">📤 Share</button>
                 </div>
-
                 <div style="display: flex; gap: 10px;">
                     <button type="button" onclick="backupData()" style="flex: 1; padding: 10px; background: #2c3e50; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size:13px;">☁️ Backup</button>
                     <label style="flex: 1; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-align: center; font-size:13px; margin: 0;">
@@ -303,11 +341,9 @@
                     <button type="button" onclick="openThemeStore()" class="expense-btn" style="background: var(--paper-bg); color: var(--ink-blue); border: 2px solid var(--ink-blue); font-size: 13px !important; padding: 10px !important; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🎨 Themes</button>
                     <button type="button" onclick="toggleSound()" id="sound-toggle-btn" class="expense-btn" style="background: var(--paper-bg); color: #10b981; border: 2px solid #10b981; font-size: 13px !important; padding: 10px !important; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🔊 Sound: ON</button>
                 </div>
-                
                 <button type="button" id="install-app-btn" onclick="installApp()" class="expense-btn" style="display: block; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; font-size: 14px !important; padding: 12px !important; border-radius: 12px; width: 100%; box-shadow: 0 4px 10px rgba(16,185,129,0.3); margin-top: 0; margin-bottom: 2px;">
                     📲 Install App To Home Screen
                 </button>
-
                 <button type="button" onclick="logout(); closeProfile();" class="expense-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 2px solid #ef4444; font-size: 14px !important; padding: 12px !important; border-radius: 12px; width: 100%; box-shadow: none; margin-top: 0;">🚪 Logout</button>
             </div>
         </div>
@@ -340,7 +376,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <script src="./script.js?v=mega"></script>
+    <script src="./script.js?v=phase2"></script>
 
     <script>
         setTimeout(() => {
