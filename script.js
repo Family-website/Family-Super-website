@@ -109,13 +109,22 @@ function logout() {
 }
 
 // ==========================================
-// ☁️ 3. CLOUD DATA SYNC & GLOBALS
+// ☁️ 3. CLOUD DATA SYNC & GLOBALS (PHASE 2)
 // ==========================================
-let familyExpenses = []; let dudhRecords = []; let rationItems = []; 
+let familyExpenses = []; let dudhRecords = []; let rationItems = []; let investments = [];
 let budgetLimit = 20000; 
 let customDisplayName = ""; 
-let monthlyIncome = 0; // Naya: Income Tracker
-let userXP = 0; // Naya: Gamification
+let monthlyIncome = 0; 
+let userXP = 0; 
+
+function showSyncSuccess() {
+    const syncEl = document.getElementById('sync-status');
+    if(syncEl) {
+        syncEl.innerText = "☁️ Synced Just Now";
+        syncEl.style.color = "#10b981";
+        setTimeout(() => { syncEl.style.color = "#94a3b8"; syncEl.innerText = "☁️ Cloud Active"; }, 3000);
+    }
+}
 
 function loadCloudData(uid) {
     try {
@@ -126,12 +135,13 @@ function loadCloudData(uid) {
                 familyExpenses = data.expenses || []; 
                 dudhRecords = data.dudh || []; 
                 rationItems = data.ration || []; 
+                investments = data.investments || [];
                 budgetLimit = data.budget || 20000;
                 customDisplayName = data.displayName || ""; 
-                monthlyIncome = data.income || 0; // Cloud se income li
-                userXP = data.xp || 0; // Cloud se XP liya
+                monthlyIncome = data.income || 0; 
+                userXP = data.xp || 0; 
                 
-                updateHisabUI(); updateDudhUI(); updateRationUI();
+                updateHisabUI(); updateDudhUI(); updateRationUI(); updateInvestUI();
                 updateGreetingName(); 
             } else { updateHisabUI(); }
         }, (error) => { console.error("Cloud fetch failed:", error); });
@@ -145,11 +155,13 @@ async function saveToCloud() {
             expenses: familyExpenses, 
             dudh: dudhRecords, 
             ration: rationItems, 
+            investments: investments,
             budget: budgetLimit,
             displayName: customDisplayName,
-            income: monthlyIncome, // Cloud pe save ki
-            xp: userXP // Cloud pe save ki
+            income: monthlyIncome, 
+            xp: userXP 
         }, { merge: true }); 
+        showSyncSuccess();
     } catch (error) { console.error("Cloud save failed:", error); }
 }
 
@@ -210,7 +222,6 @@ function updateGreetingName() {
 function gainXP(amount) {
     userXP += amount;
     saveToCloud();
-    // Sweet alert silent toast
     const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true });
     Toast.fire({ icon: 'success', title: `+${amount} XP Earned!` });
 }
@@ -229,7 +240,6 @@ function toggleTheme() {
     playSound('click');
 }
 
-// Naya: Auto Dark Mode (Raat ko khud dark ho jayega)
 function autoDarkMode() {
     const hour = new Date().getHours();
     if(hour >= 18 || hour < 6) {
@@ -254,9 +264,30 @@ function openSection(sectionName, title) {
 const todayDateString = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
 // ==========================================
+// 🔮 4.5. EXPENSE PREDICTION AI (PHASE 2)
+// ==========================================
+function updatePrediction(totalMonthExpense) {
+    let currentDay = new Date().getDate();
+    let daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    
+    let predicted = (totalMonthExpense / currentDay) * daysInMonth;
+    if(isNaN(predicted) || !isFinite(predicted)) predicted = 0;
+    
+    const predEl = document.getElementById('predicted-expense');
+    if(predEl) {
+        predEl.innerText = `₹${Math.round(predicted)} lagne ki umeed hai`;
+        if (predicted > budgetLimit) {
+            predEl.style.color = '#ef4444';
+        } else {
+            predEl.style.color = '#3730a3';
+        }
+    }
+}
+
+// ==========================================
 // 💰 5. HISAAB SECTION
 // ==========================================
- let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; 
+let editExpenseIndex = -1; let currentReceiptUrl = ""; let categoryChartInstance = null; let memberChartInstance = null; 
 const dateInput = document.getElementById('date'); if(dateInput) dateInput.value = todayDateString;
 const monthFilter = document.getElementById('month-filter'); if(monthFilter) monthFilter.value = todayDateString.slice(0, 7); 
 
@@ -277,7 +308,6 @@ if(receiptInput) {
 
 function setBudget() { Swal.fire({ title: 'Monthly Budget', input: 'number', inputValue: budgetLimit, showCancelButton: true }).then((result) => { if (result.isConfirmed && result.value > 0) { budgetLimit = result.value; saveToCloud(); renderHistoryWithSkeleton(); } }); }
 
-// Naya: Income set karne ka system
 function setIncome() {
     Swal.fire({ title: 'Is Mahine Ki Kamai (Income)', input: 'number', inputValue: monthlyIncome, showCancelButton: true }).then((result) => {
         if (result.isConfirmed && result.value >= 0) {
@@ -293,11 +323,9 @@ function updateHisabUI() {
     const filterMonth = document.getElementById('month-filter').value || todayDateString.slice(0, 7);
     const budgetDisplay = document.getElementById('budget-display'); if(budgetDisplay) budgetDisplay.innerText = budgetLimit;
     
-    // Naya: Update Income UI
     const incomeDisplay = document.getElementById('total-income-display'); 
     if(incomeDisplay) incomeDisplay.innerText = `₹${monthlyIncome}`;
 
-    // Naya: Smart Search Logic
     const searchInput = document.getElementById('search-expense');
     const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
 
@@ -338,6 +366,8 @@ function updateHisabUI() {
         bar.style.width = `${budgetPercent}%`; if(budgetPercent < 50) bar.style.background = '#2ecc71'; else if(budgetPercent < 80) bar.style.background = '#f39c12'; else bar.style.background = '#e74c3c';
         const warning = document.getElementById('budget-warning'); if(warning) warning.style.display = (budgetPercent >= 80) ? 'block' : 'none';
     }
+    
+    updatePrediction(totalExpense); // AI Prediction Call
     renderCategoryChart(categoryTotals); renderMemberChart(memberTotals);
 }
 
@@ -359,7 +389,7 @@ function addExpense() {
 
     if(editExpenseIndex === -1) {
         familyExpenses.push(newRecord); 
-        gainXP(10); // Kharcha add karne par XP milega
+        gainXP(10); 
         playSound('success');
         if(typeof confetti !== 'undefined') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); 
     } else {
@@ -374,6 +404,57 @@ function editExpense(index) {
 }
 
 function deleteExpense(index) { Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Haan!' }).then((result) => { if (result.isConfirmed) { familyExpenses.splice(index, 1); saveToCloud(); renderHistoryWithSkeleton(); } }); }
+
+// ==========================================
+// 📈 5.5. INVESTMENT TRACKER (PHASE 2)
+// ==========================================
+const investDateInput = document.getElementById('invest-date'); 
+if(investDateInput) investDateInput.value = todayDateString;
+
+function updateInvestUI() {
+    const list = document.getElementById('invest-list'); if(!list) return; list.innerHTML = '';
+    let totalInvest = 0;
+    
+    investments.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((item, index) => {
+        totalInvest += item.amount;
+        const li = document.createElement('li'); 
+        li.style.borderLeft = "4px solid #06b6d4";
+        li.innerHTML = `
+            <div class="list-left">
+                <strong style="font-size:16px;">${item.type}</strong>
+                <span style="font-size:12px; color:#64748b; font-weight:bold;">📅 ${item.date}</span>
+            </div>
+            <div class="list-right">
+                <span style="font-weight:800; color:#0891b2; font-size:18px; margin-right:10px;">₹${item.amount}</span>
+                <button class="action-btn delete" onclick="deleteInvestment(${index})">🗑️</button>
+            </div>
+        `;
+        list.appendChild(li);
+    });
+    
+    const totalEl = document.getElementById('invest-total-amount');
+    if(totalEl) totalEl.innerText = `₹${totalInvest}`;
+}
+
+function addInvestment() {
+    const type = document.getElementById('invest-type').value;
+    const amt = parseFloat(document.getElementById('invest-amount').value);
+    const date = document.getElementById('invest-date').value;
+    
+    if (isNaN(amt) || amt <= 0 || !date) return Swal.fire('Oops...', 'Sahi amount daalein!', 'warning');
+    
+    investments.push({ type, amount: amt, date });
+    saveToCloud(); updateInvestUI(); gainXP(20); 
+    document.getElementById('invest-amount').value = '';
+    playSound('success');
+    Swal.fire('Great!', 'Investment add ho gaya! Future secure 🚀', 'success');
+}
+
+function deleteInvestment(index) {
+    Swal.fire({ title: 'Delete?', icon: 'warning', showCancelButton: true }).then((result) => { 
+        if (result.isConfirmed) { investments.splice(index, 1); saveToCloud(); updateInvestUI(); } 
+    });
+}
 
 // ==========================================
 // 🛒 6. RATION LOGIC
@@ -408,7 +489,7 @@ async function toggleRation(index) {
     if (item.bought && item.amount > 0) {
         const autoExpense = { member: "Aditya", category: "Ration", description: `🛒 ${item.name} (Ration)`, amount: item.amount, date: todayDateString, receipt: "" };
         familyExpenses.push(autoExpense);
-        gainXP(5); // Ration tick karne par 5 XP
+        gainXP(5); 
         playSound('success');
         Swal.fire({ title: 'Hisaab mein juda!', text: `${item.name} ka ₹${item.amount} 'GharManager' mein add ho gaya hai. ✅`, icon: 'success', timer: 2000, showConfirmButton: false });
     }
@@ -466,16 +547,16 @@ function calculateVyaj() {
 // ==========================================
 // 💾 9. BACKUP & RESTORE SYSTEM
 // ==========================================
-function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "GharManager_Cloud_Backup.json"); dlAnchorElem.click(); }
+function backupData() { const dataToBackup = { expenses: familyExpenses, dudh: dudhRecords, ration: rationItems, investments: investments, budget: budgetLimit }; const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToBackup)); const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", "GharManager_Cloud_Backup.json"); dlAnchorElem.click(); }
 function restoreData(event) {
     const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
     reader.onload = async function(e) {
         try {
             const data = JSON.parse(e.target.result);
-            if (data.expenses || data.dudh || data.ration) {
-                familyExpenses = data.expenses || []; dudhRecords = data.dudh || []; rationItems = data.ration || []; budgetLimit = data.budget || 20000;
+            if (data.expenses || data.dudh || data.ration || data.investments) {
+                familyExpenses = data.expenses || []; dudhRecords = data.dudh || []; rationItems = data.ration || []; investments = data.investments || []; budgetLimit = data.budget || 20000;
                 await saveToCloud(); Swal.fire('Restored!', 'Aapka purana data wapas aa gaya hai! ✅', 'success');
-                renderHistoryWithSkeleton(); updateDudhUI(); updateRationUI();
+                renderHistoryWithSkeleton(); updateDudhUI(); updateRationUI(); updateInvestUI();
             } else { Swal.fire('Error', 'Yeh file sahi format mein nahi hai!', 'error'); }
         } catch(err) { Swal.fire('Error', 'File read nahi ho paayi.', 'error'); }
     }; reader.readAsText(file);
@@ -518,7 +599,6 @@ function openProfile() {
         updateGreetingName(); 
     }
     
-    // XP Level Badge Update
     const lvlBadge = document.getElementById('profile-level-badge');
     if(lvlBadge) {
         let level = Math.floor(userXP / 100) + 1;
@@ -540,14 +620,12 @@ function closeProfile() { document.getElementById('profile-modal').style.display
 function askFinanceAI() {
     if(familyExpenses.length === 0) return Swal.fire('🤖 AI', 'Bhai, pehle kuch kharcha toh add karo, tabhi toh hisaab bataunga!', 'info');
     
-    // 1. Sabse zyada kharcha kahan hua?
     let catTotals = {}; let maxCat = ""; let maxAmt = 0;
     familyExpenses.forEach(exp => {
         catTotals[exp.category] = (catTotals[exp.category] || 0) + exp.amount;
         if(catTotals[exp.category] > maxAmt) { maxAmt = catTotals[exp.category]; maxCat = exp.category; }
     });
 
-    // 2. Savings check (Income - Expense)
     let filterMonth = document.getElementById('month-filter') ? document.getElementById('month-filter').value : todayDateString.slice(0,7);
     let monthExpenses = familyExpenses.filter(item => item.date && item.date.startsWith(filterMonth));
     let totalExpMonth = monthExpenses.reduce((sum, item) => sum + item.amount, 0);
@@ -589,7 +667,7 @@ function applyTheme(themeName) {
 window.addEventListener('DOMContentLoaded', () => {
     let savedAppTheme = localStorage.getItem('appTheme'); if(savedAppTheme) document.body.setAttribute('data-theme', savedAppTheme);
     updateSoundUI();
-    autoDarkMode(); // App khulte hi check karega
+    autoDarkMode(); 
 });
 
 // ==========================================
