@@ -620,7 +620,21 @@ function exportToExcel() {
 
 // 🛡️ AI CHAT FIX WITH EXACT ERROR LOGGING
 async function sendToRealAI() {
-    const GEMINI_API_KEY = "AIzaSyC5VaHXD9zC5Zpf_vcsYdaZq6ehJOcaIfk"; 
+    const GEMINI_API_KEY = "curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
+  -H 'Content-Type: application/json' \
+  -H 'X-goog-api-key: AIzaSyCMyk_s0y81CtzWlqv1-1SggbXs0zsqQJQ' \
+  -X POST \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Explain how AI works in a few words"
+          }
+        ]
+      }
+    ]
+  }'"; 
 
     let inputEl = document.getElementById('ai-user-input');
     let chatBox = document.getElementById('ai-chat-box');
