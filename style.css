@@ -6,7 +6,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Caveat:wght@500;600;700&display=swap');
 
-/* ── 1. DESIGN TOKENS ──────────────────────────────────────── */
+/* ── 1. DESIGN TOKENS  ──────────────────────────────────────── */
 :root {
     --ink-blue:       #007AFF;
     --ink-blue-dark:  #0055CC;
