@@ -1,7 +1,6 @@
 // ==========================================
 // 🔥 DATA CACHING (INCOME PRESERVE)
 // ==========================================
-
 let cachedData = JSON.parse(localStorage.getItem('appDataCache') || '{}');
 
 let familyExpenses = JSON.parse(localStorage.getItem('familyExpenses') || '[]'); 
