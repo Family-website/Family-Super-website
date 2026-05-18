@@ -1,0 +1,1166 @@
+/* ============================================================
+   ✨ GHARMANAGER PRO — PREMIUM UI SYSTEM v3.0
+   Next-Level Design: Glassmorphism + Neumorphism Hybrid
+   Smooth Animations · iOS Feel · Pro Typography
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Caveat:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES — DESIGN TOKENS
+   ============================================================ */
+:root {
+    /* Core Colors */
+    --bg-color:       #f0f4ff;
+    --paper-bg:       #ffffff;
+    --text-main:      #0f172a;
+    --text-muted:     #64748b;
+    --line-color:     #e8edf8;
+    --ink-blue:       #2563eb;
+    --ink-red:        #ef4444;
+    --btn-shadow:     #1d4ed8;
+    --shadow-color:   rgba(37, 99, 235, 0.12);
+
+    /* Extended Palette */
+    --green:          #10b981;
+    --amber:          #f59e0b;
+    --purple:         #8b5cf6;
+    --pink:           #ec4899;
+    --teal:           #0891b2;
+
+    /* Glassmorphism */
+    --glass-bg:       rgba(255,255,255,0.72);
+    --glass-border:   rgba(255,255,255,0.5);
+    --glass-blur:     20px;
+
+    /* Shadows — Layered */
+    --shadow-xs:      0 1px 3px rgba(15,23,42,0.06);
+    --shadow-sm:      0 4px 12px rgba(15,23,42,0.08);
+    --shadow-md:      0 8px 24px rgba(15,23,42,0.10);
+    --shadow-lg:      0 16px 40px rgba(15,23,42,0.12);
+    --shadow-ink:     0 8px 24px var(--shadow-color);
+
+    /* Radii */
+    --radius-sm:      10px;
+    --radius-md:      16px;
+    --radius-lg:      20px;
+    --radius-xl:      28px;
+    --radius-pill:    999px;
+
+    /* Transitions */
+    --ease-bounce:    cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth:    cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring:    cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --dur-fast:       0.18s;
+    --dur-normal:     0.28s;
+    --dur-slow:       0.45s;
+
+    /* Typography Scale */
+    --font-body:      'Nunito', sans-serif;
+    --font-display:   'Plus Jakarta Sans', sans-serif;
+    --font-cursive:   'Caveat', cursive;
+}
+
+/* ── PIN NUMPAD ────────────────────────────────────────── */
+.pin-key {
+    background: var(--paper-bg);
+    border: 2px solid var(--line-color);
+    border-radius: 16px;
+    padding: 14px 8px;
+    font-size: 22px;
+    font-weight: 800;
+    font-family: var(--font-display);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), background 0.15s, box-shadow 0.15s;
+    line-height: 1;
+    box-shadow: var(--shadow-xs);
+}
+.pin-key:active {
+    transform: scale(0.88);
+    background: var(--line-color);
+    box-shadow: none;
+}
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+@keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+@keyframes shimmer-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+.gm-login-card {
+    box-shadow: 0 24px 60px rgba(15,23,42,0.18), 0 8px 20px rgba(37,99,235,0.12);
+}
+
+/* ── NIGHT MODE ─────────────────────────────────────────── */
+[data-theme="night"] {
+    --bg-color:       #070d1a;
+    --paper-bg:       #111827;
+    --text-main:      #f1f5f9;
+    --text-muted:     #94a3b8;
+    --line-color:     #1e2d45;
+    --ink-blue:       #60a5fa;
+    --ink-red:        #f87171;
+    --btn-shadow:     #1e3a8a;
+    --shadow-color:   rgba(96,165,250,0.18);
+    --glass-bg:       rgba(17,24,39,0.8);
+    --glass-border:   rgba(255,255,255,0.08);
+}
+
+/* ── NATURE THEME ──────────────────────────────────────── */
+[data-theme="nature"] {
+    --bg-color:       #ecfdf5;
+    --paper-bg:       #f0fdf4;
+    --text-main:      #052e16;
+    --text-muted:     #166534;
+    --line-color:     #d1fae5;
+    --ink-blue:       #059669;
+    --btn-shadow:     #065f46;
+    --shadow-color:   rgba(5,150,105,0.15);
+}
+
+/* ── SUNSET / PURPLE THEME ─────────────────────────────── */
+[data-theme="sunset"] {
+    --bg-color:       #fdf4ff;
+    --paper-bg:       #fdf8ff;
+    --text-main:      #2e1065;
+    --text-muted:     #7e22ce;
+    --line-color:     #f3e8ff;
+    --ink-blue:       #9333ea;
+    --btn-shadow:     #6b21a8;
+    --shadow-color:   rgba(147,51,234,0.15);
+}
+
+/* ── CYBERPUNK THEME ───────────────────────────────────── */
+[data-theme="cyberpunk"] {
+    --bg-color:       #080c1a;
+    --paper-bg:       #0d1226;
+    --text-main:      #f0f9ff;
+    --text-muted:     #f472b6;
+    --line-color:     #1a1f40;
+    --ink-blue:       #db2777;
+    --btn-shadow:     #9d174d;
+    --shadow-color:   rgba(219,39,119,0.35);
+    --glass-bg:       rgba(13,18,38,0.85);
+}
+
+/* ── GLASS UI THEME ────────────────────────────────────── */
+[data-theme="glass"] {
+    --bg-color:       #dbeafe;
+    --paper-bg:       rgba(255,255,255,0.55);
+    --text-main:      #0c2461;
+    --text-muted:     #1d4ed8;
+    --line-color:     rgba(255,255,255,0.4);
+    --ink-blue:       #2563eb;
+    --btn-shadow:     #1e40af;
+    --glass-bg:       rgba(255,255,255,0.45);
+    --glass-border:   rgba(255,255,255,0.7);
+    --glass-blur:     24px;
+}
+
+/* ── CYBERPUNK EXTENDED CSS ───────────────────── */
+[data-theme="cyberpunk"] .balance-card,
+[data-theme="cyberpunk"] .form-section,
+[data-theme="cyberpunk"] .history-section {
+    border: 1px solid #db2777 !important;
+    box-shadow: 0 0 20px rgba(219,39,119,0.3), inset 0 0 20px rgba(219,39,119,0.05) !important;
+}
+[data-theme="cyberpunk"] .expense-btn {
+    background: linear-gradient(135deg, #db2777, #9d174d) !important;
+    box-shadow: 0 4px 0 #831843, 0 0 20px rgba(219,39,119,0.5) !important;
+}
+
+/* ── GLASS EXTENDED CSS ───────────────────────── */
+[data-theme="glass"] .balance-card,
+[data-theme="glass"] .form-section,
+[data-theme="glass"] .history-section,
+[data-theme="glass"] .budget-section {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+/* ============================================================
+   2. BASE RESET & GLOBAL STYLES
+   ============================================================ */
+*, *::before, *::after {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-body) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    background: var(--bg-color);
+    color: var(--text-main);
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    min-height: 100vh;
+    /* Subtle mesh background */
+    background-image:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(37,99,235,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.05) 0%, transparent 60%);
+    background-attachment: fixed;
+}
+
+[data-theme="night"] body,
+[data-theme="cyberpunk"] body {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(96,165,250,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.06) 0%, transparent 60%);
+}
+
+/* ── TYPOGRAPHY ────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    font-family: var(--font-display) !important;
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+}
+
+h1 { font-size: 32px; font-weight: 900; }
+h2 { font-size: 24px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 800; }
+
+#app-title {
+    font-family: var(--font-cursive) !important;
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: var(--ink-blue);
+    letter-spacing: 0 !important;
+}
+
+#lock-title {
+    font-family: var(--font-cursive) !important;
+    font-size: 40px !important;
+    color: var(--ink-blue);
+}
+
+#total-expense,
+#dudh-total-bill,
+#invest-total-amount {
+    font-size: 38px !important;
+    font-weight: 900 !important;
+    font-family: var(--font-display) !important;
+    letter-spacing: -1px;
+    color: #b91c1c;
+}
+
+.balance-card p {
+    font-family: var(--font-display) !important;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #854d0e;
+    opacity: 0.85;
+}
+
+/* ============================================================
+   3. STRUCTURAL LAYOUT
+   ============================================================ */
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 100px;
+}
+
+.content-area { padding-bottom: 20px; }
+
+/* ============================================================
+   4. CARDS & SECTIONS — Premium Elevated Style
+   ============================================================ */
+.balance-card,
+.form-section,
+.history-section,
+.result-card,
+.budget-section {
+    background: var(--paper-bg);
+    border-radius: var(--radius-xl);
+    padding: 22px;
+    margin: 14px 16px;
+    box-shadow: var(--shadow-md), var(--shadow-ink);
+    border: 1px solid rgba(255,255,255,0.8);
+    /* Staggered entrance */
+    transform: translateY(18px);
+    opacity: 0;
+    animation: cardRise var(--dur-slow) var(--ease-spring) forwards;
+    will-change: transform, opacity;
+}
+
+.balance-card { animation-delay: 0.08s; }
+.budget-section { animation-delay: 0.14s; }
+.form-section { animation-delay: 0.2s; }
+.history-section { animation-delay: 0.28s; }
+.result-card { animation-delay: 0.15s; }
+
+@keyframes cardRise {
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Balance card — golden premium glow */
+.balance-card {
+    background: linear-gradient(145deg, #fef9c3, #fef08a, #fde68a) !important;
+    border: 1.5px solid #fcd34d !important;
+    box-shadow: 0 10px 30px rgba(251,191,36,0.25), 0 4px 12px rgba(0,0,0,0.06) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative radial glow on balance card */
+.balance-card::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(251,191,36,0.4) 0%, transparent 70%);
+    top: -60px; right: -60px;
+    pointer-events: none;
+}
+
+.balance-card::after {
+    content: '';
+    position: absolute;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, transparent 70%);
+    bottom: -20px; left: -20px;
+    pointer-events: none;
+}
+
+/* Night mode balance card */
+[data-theme="night"] .balance-card {
+    background: linear-gradient(145deg, #1e293b, #1a2744) !important;
+    border: 1.5px solid #334155 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+}
+[data-theme="night"] .balance-card p { color: #94a3b8; }
+[data-theme="night"] .balance-card h1 { color: #f87171; }
+
+/* Budget section */
+.budget-section {
+    border-left: 4px solid var(--ink-blue);
+}
+
+/* ============================================================
+   5. 3D PREMIUM BUTTONS
+   ============================================================ */
+.expense-btn {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, var(--ink-blue), color-mix(in srgb, var(--ink-blue) 80%, #000));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    padding: 14px 20px !important;
+    width: 100%;
+    margin-top: 14px;
+    cursor: pointer;
+    /* 3D press shadow */
+    box-shadow:
+        0 5px 0 var(--btn-shadow),
+        0 12px 24px var(--shadow-color),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+    transition:
+        transform var(--dur-fast) var(--ease-smooth),
+        box-shadow var(--dur-fast) var(--ease-smooth);
+    letter-spacing: 0.3px;
+}
+
+.expense-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 7px 0 var(--btn-shadow),
+        0 16px 32px var(--shadow-color),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.expense-btn:active {
+    transform: translateY(5px);
+    box-shadow:
+        0 0px 0 var(--btn-shadow),
+        0 5px 12px var(--shadow-color);
+}
+
+/* Ripple effect */
+.expense-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(255,255,255,0.28);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.5s ease-out, height 0.5s ease-out, opacity 0.5s;
+    opacity: 0;
+}
+.expense-btn:active::after {
+    width: 320px; height: 320px;
+    opacity: 1; transition: 0s;
+}
+
+/* Shimmer sweep on hover */
+.expense-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+.expense-btn:hover::before { left: 150%; }
+
+/* ============================================================
+   6. FORM INPUTS — iOS-Grade Polish
+   ============================================================ */
+input, select, textarea {
+    width: 100%;
+    background: var(--line-color);
+    color: var(--text-main);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body) !important;
+    font-size: 15px !important;
+    font-weight: 600;
+    padding: 13px 16px !important;
+    margin-bottom: 12px;
+    outline: none;
+    transition:
+        border-color var(--dur-fast) var(--ease-smooth),
+        background var(--dur-fast) var(--ease-smooth),
+        box-shadow var(--dur-fast) var(--ease-smooth),
+        transform var(--dur-fast) var(--ease-smooth);
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--ink-blue);
+    background: var(--paper-bg);
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,0.10),
+        0 4px 12px rgba(37,99,235,0.08);
+    transform: translateY(-1px);
+}
+
+/* Select arrow */
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 40px !important;
+}
+
+label {
+    display: block;
+    font-size: 12px !important;
+    font-weight: 800;
+    color: var(--text-muted);
+    margin-bottom: 6px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Placeholder styling */
+input::placeholder, textarea::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* ============================================================
+   7. LIST ITEMS — Swipeable Card Style
+   ============================================================ */
+ul { list-style: none; }
+
+li {
+    background: var(--paper-bg);
+    margin-bottom: 10px;
+    padding: 14px 16px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--line-color);
+    transition:
+        transform var(--dur-fast) var(--ease-smooth),
+        box-shadow var(--dur-fast) var(--ease-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--ink-blue);
+    opacity: 0;
+    transition: opacity var(--dur-fast);
+}
+
+li:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+}
+li:hover::before { opacity: 1; }
+
+li:active { transform: scale(0.98); }
+
+.list-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+.list-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+/* ── BADGES ─────────────────────────────────────────────── */
+.member-badge {
+    background: #e0e7ff;
+    color: #4f46e5;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+.category-badge {
+    background: #fef3c7;
+    color: #b45309;
+    padding: 3px 9px;
+    border-radius: var(--radius-pill);
+    font-size: 11px;
+    font-weight: 800;
+}
+
+/* ── ACTION BUTTONS ─────────────────────────────────────── */
+.action-btn {
+    background: var(--line-color);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    cursor: pointer;
+    margin-left: 6px;
+    font-size: 14px;
+    transition:
+        transform var(--dur-fast) var(--ease-bounce),
+        background var(--dur-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.action-btn:hover { background: var(--line-color); filter: brightness(0.94); }
+.action-btn:active { transform: scale(0.82); }
+.action-btn.delete { background: #fff1f2; }
+.action-btn.edit { background: #eff6ff; }
+
+/* ============================================================
+   8. BOTTOM NAVIGATION — Frosted Dock
+   ============================================================ */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 600px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    justify-content: flex-start !important;
+    gap: 0;
+    padding: 10px 12px 18px 12px !important;
+    z-index: 100;
+    box-shadow: 0 -8px 32px rgba(15,23,42,0.10);
+}
+.bottom-nav::-webkit-scrollbar { display: none; }
+
+.nav-btn {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    flex: 0 0 auto;
+    min-width: 60px;
+    transition:
+        color var(--dur-fast) var(--ease-smooth),
+        background var(--dur-fast) var(--ease-smooth);
+    position: relative;
+}
+
+/* Nav icon wrapper with rubber bounce */
+.nav-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 32px;
+}
+
+.nav-icon-wrap svg {
+    transition: transform var(--dur-fast) var(--ease-bounce);
+}
+
+.nav-btn:active .nav-icon-wrap svg {
+    transform: scale(0.75) rotate(-8deg);
+}
+
+.nav-btn span {
+    font-family: var(--font-display) !important;
+    font-size: 9.5px !important;
+    font-weight: 800 !important;
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* Active nav — pill indicator */
+.nav-btn.active-nav {
+    color: var(--ink-blue);
+}
+
+.nav-btn.active-nav .nav-icon-wrap svg {
+    transform: scale(1.18) translateY(-2px);
+    filter: drop-shadow(0 4px 6px var(--shadow-color));
+}
+
+.nav-btn.active-nav::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 22px; height: 3px;
+    background: var(--ink-blue);
+    border-radius: var(--radius-pill) var(--radius-pill) 0 0;
+    animation: dotPop var(--dur-normal) var(--ease-bounce);
+}
+
+@keyframes dotPop {
+    from { width: 0; opacity: 0; }
+    to { width: 22px; opacity: 1; }
+}
+
+/* ============================================================
+   9. SECTION TRANSITIONS — Smooth Reveal
+   ============================================================ */
+.app-section { display: none; }
+
+.active-section {
+    display: block;
+    animation: sectionReveal var(--dur-normal) var(--ease-smooth) forwards;
+}
+
+@keyframes sectionReveal {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   10. SKELETON LOADERS — Premium Shimmer
+   ============================================================ */
+.skeleton-box {
+    background: linear-gradient(
+        90deg,
+        var(--line-color) 25%,
+        color-mix(in srgb, var(--line-color) 60%, var(--paper-bg)) 50%,
+        var(--line-color) 75%
+    );
+    background-size: 300% 100%;
+    animation: shimmer 1.6s infinite ease-in-out;
+    border-radius: var(--radius-md);
+    height: 72px;
+    margin-bottom: 12px;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================================
+   11. PREMIUM ANIMATIONS & MICRO-INTERACTIONS
+   ============================================================ */
+
+/* Floating animation for hero icons */
+.anim-premium-icon {
+    display: inline-block;
+    animation: premiumFloat 3.5s ease-in-out infinite;
+    filter: drop-shadow(0 10px 12px rgba(0,0,0,0.12));
+}
+
+@keyframes premiumFloat {
+    0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+    33%       { transform: translateY(-6px) rotate(2deg) scale(1.02); }
+    66%       { transform: translateY(-3px) rotate(-1deg) scale(1.01); }
+}
+
+/* Profile card — liquid blob decoration */
+.profile-card-anim {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card-anim::before {
+    content: '';
+    position: absolute;
+    width: 180px; height: 180px;
+    background: linear-gradient(135deg, var(--ink-blue), var(--purple));
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    filter: blur(50px);
+    opacity: 0.10;
+    top: -40px; right: -40px;
+    z-index: 0;
+    animation: blobMorph 10s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes blobMorph {
+    0%   { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; transform: scale(1) rotate(0deg); }
+    50%  { border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%; transform: scale(1.1) rotate(10deg); }
+    100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1.2) rotate(-5deg); }
+}
+
+/* 3-dot menu button pulse on load */
+#three-dot-btn {
+    animation: subtlePulse 3s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+    0%, 100% { box-shadow: 0 2px 8px var(--shadow-color); }
+    50%       { box-shadow: 0 2px 16px var(--shadow-color), 0 0 0 4px rgba(37,99,235,0.06); }
+}
+
+/* FAB buttons */
+#ai-fab-btn {
+    transition: transform 0.18s var(--ease-bounce), box-shadow 0.2s !important;
+}
+#ai-fab-btn:hover { transform: scale(1.08) !important; }
+#ai-fab-btn:active { transform: scale(0.88) rotate(-5deg) !important; }
+
+/* All buttons get rubber click */
+button:active { transform: scale(0.95); }
+
+/* Scroll add button */
+button[onclick="scrollToAdd()"] {
+    animation: fabBounce 2.5s ease-in-out infinite;
+}
+@keyframes fabBounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-4px); }
+}
+
+/* ============================================================
+   12. IOS-STYLE TOGGLE CHECKBOXES (Ration)
+   ============================================================ */
+.ration-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 46px !important;
+    height: 26px !important;
+    background: #cbd5e1;
+    border-radius: var(--radius-pill);
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.12);
+    transition:
+        background var(--dur-normal) var(--ease-smooth),
+        transform var(--dur-fast);
+    margin-right: 12px !important;
+    flex-shrink: 0;
+}
+
+.ration-item input[type="checkbox"]::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+    transition: transform var(--dur-normal) var(--ease-bounce);
+}
+
+.ration-item input[type="checkbox"]:checked {
+    background: var(--green);
+}
+.ration-item input[type="checkbox"]:checked::after {
+    transform: translateX(20px);
+}
+.ration-item input[type="checkbox"]:active {
+    transform: scale(0.92);
+}
+
+/* ============================================================
+   13. LOCK / OVERLAY SCREENS
+   ============================================================ */
+.lock-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(7, 13, 26, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: overlayIn var(--dur-normal) var(--ease-smooth);
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to   { opacity: 1; backdrop-filter: blur(12px); }
+}
+
+.lock-card {
+    background: var(--paper-bg);
+    border-radius: var(--radius-xl);
+    padding: 30px 22px;
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.25),
+        0 4px 16px rgba(0,0,0,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    text-align: center;
+    animation: cardPopIn var(--dur-slow) var(--ease-spring);
+    border: 1px solid rgba(255,255,255,0.6);
+    position: relative;
+}
+
+@keyframes cardPopIn {
+    from { opacity: 0; transform: scale(0.88) translateY(24px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Profile modal — bottom sheet */
+#profile-modal > .lock-card {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+    max-height: 92vh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    position: fixed !important;
+    bottom: 0; left: 0;
+    box-shadow: 0 -12px 48px rgba(0,0,0,0.18);
+    animation: sheetUp var(--dur-slow) var(--ease-spring);
+}
+
+#profile-modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+}
+
+@keyframes sheetUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+/* Lock icon */
+.lock-icon { font-size: 48px; margin-bottom: 12px; display: block; }
+
+/* ============================================================
+   14. THEME BUTTONS
+   ============================================================ */
+.theme-btn {
+    padding: 12px 10px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display) !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition:
+        transform var(--dur-fast) var(--ease-bounce),
+        box-shadow var(--dur-fast);
+    letter-spacing: 0.2px;
+}
+
+.theme-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.theme-btn:active { transform: scale(0.93); }
+
+/* ============================================================
+   15. PULL-TO-REFRESH INDICATOR
+   ============================================================ */
+#pull-to-refresh {
+    text-align: center;
+    color: var(--ink-blue);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 12px;
+    display: none;
+    transition: 0.3s;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-color);
+}
+
+/* ============================================================
+   16. OFFLINE BANNER
+   ============================================================ */
+#offline-banner {
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+    box-shadow: 0 4px 16px rgba(239,68,68,0.4);
+    font-family: var(--font-display) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px;
+}
+
+/* ============================================================
+   17. SCROLLBAR — Thin & Stylish
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: var(--line-color);
+    border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ============================================================
+   18. DATE HEADER IN HISAAB LIST
+   ============================================================ */
+.date-header {
+    font-family: var(--font-display) !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: var(--ink-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 14px 0 6px 0;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, rgba(37,99,235,0.08), transparent);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--ink-blue);
+}
+
+/* ============================================================
+   19. RECEIPT THUMBNAIL
+   ============================================================ */
+.receipt-thumb {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: var(--radius-sm) !important;
+    object-fit: cover;
+    border: 2px solid var(--line-color);
+    cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-bounce);
+}
+.receipt-thumb:hover { transform: scale(1.15); }
+
+/* ============================================================
+   20. SWEETALERT2 CUSTOMIZATION
+   ============================================================ */
+.swal2-popup {
+    border-radius: var(--radius-xl) !important;
+    font-family: var(--font-body) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
+}
+
+.swal2-title {
+    font-family: var(--font-display) !important;
+    font-weight: 800 !important;
+    font-size: 20px !important;
+}
+
+.swal2-confirm, .swal2-cancel {
+    border-radius: var(--radius-md) !important;
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    padding: 11px 22px !important;
+}
+
+.swal2-input, .swal2-select {
+    border-radius: var(--radius-md) !important;
+    border: 2px solid var(--line-color) !important;
+    font-family: var(--font-body) !important;
+    font-weight: 600 !important;
+}
+
+.swal2-input:focus, .swal2-select:focus {
+    border-color: var(--ink-blue) !important;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.1) !important;
+}
+
+/* Bottom sheet for AI chat */
+.bottom-sheet-container .swal2-popup {
+    border-radius: 24px 24px 0 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* ============================================================
+   21. PROGRESSIVE ENTRANCE — Staggered List Items
+   ============================================================ */
+li:nth-child(1) { animation: listItemIn 0.3s var(--ease-spring) 0.00s both; }
+li:nth-child(2) { animation: listItemIn 0.3s var(--ease-spring) 0.04s both; }
+li:nth-child(3) { animation: listItemIn 0.3s var(--ease-spring) 0.08s both; }
+li:nth-child(4) { animation: listItemIn 0.3s var(--ease-spring) 0.12s both; }
+li:nth-child(5) { animation: listItemIn 0.3s var(--ease-spring) 0.16s both; }
+li:nth-child(n+6) { animation: listItemIn 0.3s var(--ease-spring) 0.20s both; }
+
+@keyframes listItemIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ============================================================
+   22. FOCUS VISIBLE — Keyboard Accessibility
+   ============================================================ */
+:focus-visible {
+    outline: 3px solid var(--ink-blue);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   23. SELECTION COLOR
+   ============================================================ */
+::selection {
+    background: rgba(37,99,235,0.18);
+    color: var(--text-main);
+}
+
+/* ============================================================
+   24. PRINT STYLES
+   ============================================================ */
+@media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area {
+        position: absolute; left: 0; top: 0; width: 100%;
+        font-family: Arial, sans-serif;
+    }
+}
+
+@media screen { #print-area { display: none; } }
+
+/* ============================================================
+   25. RESPONSIVE — Tablet/Desktop
+   ============================================================ */
+@media (min-width: 480px) {
+    .app-container { padding-bottom: 110px; }
+    .balance-card, .form-section, .history-section, .budget-section { margin: 16px 20px; }
+    #total-expense { font-size: 44px !important; }
+}
+
+@media (min-width: 600px) {
+    body { padding: 0 8px; }
+    .bottom-nav { border-radius: 24px 24px 0 0; }
+}
+
+/* ============================================================
+   26. REDUCED MOTION — Accessibility
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================
+   27. MISC POLISH
+   ============================================================ */
+
+/* Search bar focus glow */
+#search-expense:focus {
+    border-color: var(--ink-blue) !important;
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.10), 0 4px 12px rgba(37,99,235,0.08) !important;
+}
+
+/* Quick filter chips */
+[id^="chip-"] {
+    transition:
+        background var(--dur-fast),
+        color var(--dur-fast),
+        transform var(--dur-fast) var(--ease-bounce),
+        box-shadow var(--dur-fast);
+}
+[id^="chip-"]:active { transform: scale(0.92); }
+
+/* Drag handle in modals */
+.lock-card > div:first-child {
+    transition: opacity var(--dur-fast);
+}
+
+/* h3 in history section */
+.history-section h3 {
+    font-family: var(--font-display) !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: var(--text-main);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--line-color);
+}
+
+/* Balance card emoji icon centering */
+.balance-card .anim-premium-icon {
+    margin: 10px auto 0 auto !important;
+}
+
+/* Budget bar */
+#budget-bar {
+    transition: width 0.7s var(--ease-smooth), background 0.4s !important;
+    border-radius: var(--radius-pill) !important;
+}
+
+/* Splash screen */
+#splash-screen {
+    background: linear-gradient(145deg, #f0f4ff, #e8eeff) !important;
+}
+
+/* Nav active glow */
+.nav-btn.active-nav .nav-icon-wrap svg {
+    filter: drop-shadow(0 0 6px var(--shadow-color));
+}
+
+/* Three-dot menu button */
+#three-dot-btn:active {
+    transform: scale(0.88) !important;
+    transition: transform 0.12s !important;
+}
